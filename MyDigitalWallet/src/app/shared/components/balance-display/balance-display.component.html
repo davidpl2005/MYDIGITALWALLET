@@ -1,0 +1,13 @@
+<div class="balance-card">
+  <p class="greeting">Hola, {{ userName || 'Usuario' }}</p>
+
+  <h2 class="label">Saldo disponible</h2>
+
+  <h1 class="amount">
+    {{ showBalance ? ('$ ' + (balance || 0).toLocaleString('es-CO')) : '••••••' }}
+  </h1>
+
+  <ion-button size="small" fill="outline" (click)="toggleBalance()">
+    {{ showBalance ? 'Ocultar saldo' : 'Mostrar saldo' }}
+  </ion-button>
+</div>

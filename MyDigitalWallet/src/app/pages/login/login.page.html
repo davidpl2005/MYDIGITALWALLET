@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+    <ion-item>
+      <ion-label position="stacked">Correo</ion-label>
+      <ion-input type="email" formControlName="email"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="f['email'].touched && f['email'].invalid">
+      <small>Ingrese un correo válido.</small>
+    </ion-text>
+
+    <ion-item>
+      <ion-label position="stacked">Contraseña</ion-label>
+      <ion-input type="password" formControlName="password"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="f['password'].touched && f['password'].invalid">
+      <small>La contraseña debe tener mínimo 6 caracteres.</small>
+    </ion-text>
+
+    <ion-text color="danger" *ngIf="errorMessage">
+      <p>{{ errorMessage }}</p>
+    </ion-text>
+
+    <ion-button
+      expand="block"
+      type="submit"
+      class="ion-margin-top"
+      [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Ingresando...' : 'Iniciar sesión' }}
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      fill="outline"
+      type="button"
+      class="ion-margin-top"
+      (click)="goToRegister()">
+      Ir a registro
+    </ion-button>
+  </form>
+</ion-content>

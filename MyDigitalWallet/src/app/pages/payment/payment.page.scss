@@ -1,0 +1,54 @@
+.payment-container {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.amount {
+  font-size: 40px;
+  font-weight: bold;
+  color: #4cd964;
+  margin: 20px 0;
+}
+
+.card-box {
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px 0;
+  color: white;
+  text-align: left;
+}
+
+.visa-card {
+  background: linear-gradient(135deg, #1d2b64, #3a5fc4);
+}
+
+.mastercard-card {
+  background: linear-gradient(135deg, #b23a00, #ff7a00);
+}
+
+.default-card {
+  background: linear-gradient(135deg, #444, #666);
+}
+
+.chip {
+  width: 40px;
+  height: 25px;
+  background: gold;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.card-number {
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.confirm-btn {
+  margin-top: 30px;
+}

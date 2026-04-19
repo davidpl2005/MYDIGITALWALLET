@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Home</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ng-container *ngIf="!isLoading && user; else loadingTemplate">
+    <app-balance-display
+      [userName]="user.name"
+      [balance]="user.balance || 0">
+    </app-balance-display>
+
+    <app-quick-actions
+      (addCard)="goToAddCard()"
+      (goPayment)="goToPayment()"
+      (logout)="logout()">
+    </app-quick-actions>
+
+    <div class="cards-section">
+      <h2>Mis tarjetas</h2>
+
+      <ion-card *ngIf="cards.length === 0">
+        <ion-card-content>
+          No tienes tarjetas registradas.
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card *ngFor="let card of cards">
+        <ion-card-header>
+          <div class="card-header-row">
+            <ion-card-title>
+              {{ card.brand === 'visa' ? 'Visa' : 'Mastercard' }}
+            </ion-card-title>
+
+            <div class="card-actions">
+              <ion-button size="small" fill="outline" (click)="editCard(card)">
+                Editar
+              </ion-button>
+              <ion-button size="small" color="danger" fill="outline" (click)="deleteCard(card)">
+                Eliminar
+              </ion-button>
+            </div>
+          </div>
+        </ion-card-header>
+
+        <ion-card-content>
+          <p>{{ getMaskedCardNumber(card.cardNumber) }}</p>
+          <p>Titular: {{ card.holderName }}</p>
+          <p>Expira: {{ card.expiryDate }}</p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <div class="transactions-section">
+      <h2>Historial de transacciones</h2>
+
+      <ion-card *ngIf="transactions.length === 0">
+        <ion-card-content>
+          No hay transacciones todavía.
+        </ion-card-content>
+      </ion-card>
+
+      <ion-list lines="none" *ngIf="transactions.length > 0">
+        <ion-item-sliding *ngFor="let tx of transactions" #slidingItem>
+          <ion-item class="transaction-item" detail="false">
+            <div class="tx-row">
+              <div>
+                <h3>{{ tx.merchant }}</h3>
+                <p>{{ getCardInfo(tx.cardId) }}</p>
+                <small>
+                  {{ tx.date?.toDate ? (tx.date.toDate() | date:'short') : (tx.date | date:'short') }}
+                </small>
+              </div>
+
+              <div class="tx-amount">
+                $ {{ tx.amount | number }}
+              </div>
+            </div>
+          </ion-item>
+
+          <ion-item-options side="end">
+            <ion-item-option
+              color="danger"
+              expandable
+              (click)="deleteTransaction(tx, slidingItem)">
+              Eliminar
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+    </div>
+  </ng-container>
+
+  <ng-template #loadingTemplate>
+    <p>Cargando perfil...</p>
+  </ng-template>
+</ion-content>

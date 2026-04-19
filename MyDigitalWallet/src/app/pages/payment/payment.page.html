@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Confirm Payment</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ng-container *ngIf="!isLoading; else loading">
+
+    <div class="payment-container">
+      <h2>{{ merchant }}</h2>
+
+      <h1 class="amount">
+        $ {{ amount | number }}
+      </h1>
+
+      <div class="card-box" *ngIf="selectedCard" [ngClass]="getCardClass(selectedCard)">
+        <div class="chip"></div>
+
+        <div class="card-number">
+          {{ getMaskedCardNumber(selectedCard.cardNumber) }}
+        </div>
+
+        <div class="card-footer">
+          <span>{{ selectedCard.holderName }}</span>
+          <span>{{ selectedCard.brand | uppercase }}</span>
+        </div>
+      </div>
+
+      <ion-item *ngIf="cards.length > 1">
+        <ion-label>Seleccionar tarjeta</ion-label>
+        <ion-select (ionChange)="changeCard($event.detail.value)">
+          <ion-select-option *ngFor="let card of cards" [value]="card">
+            {{ card.brand | uppercase }} - {{ getMaskedCardNumber(card.cardNumber) }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-button expand="block" class="confirm-btn" (click)="confirmPayment()">
+        Confirm Payment
+      </ion-button>
+    </div>
+
+  </ng-container>
+
+  <ng-template #loading>
+    <p>Cargando...</p>
+  </ng-template>
+</ion-content>
