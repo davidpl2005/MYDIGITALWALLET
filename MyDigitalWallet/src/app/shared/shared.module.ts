@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 
 import { CardComponent } from './components/card/card.component';
 import { TransactionListComponent } from './components/transaction-list/transaction-list.component';
@@ -29,13 +30,15 @@ import { CalendarComponent } from './components/calendar/calendar.component';
     CommonModule,
     IonicModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    PickerComponent
   ],
   exports: [
     CommonModule,
     IonicModule,
     FormsModule,
     ReactiveFormsModule,
+    PickerComponent,
     CardComponent,
     TransactionListComponent,
     TransactionItemComponent,

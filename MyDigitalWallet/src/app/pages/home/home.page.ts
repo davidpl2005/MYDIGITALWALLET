@@ -21,6 +21,10 @@ export class HomePage implements OnInit {
   transactions: TransactionModel[] = [];
   isLoading = true;
 
+  showEmojiPicker = false;
+  selectedTransaction: TransactionModel | null = null;
+  pressTimer: any = null;
+
   constructor(
     private authService: AuthService,
     private userService: UserService,
@@ -255,6 +259,49 @@ export class HomePage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  startPress(tx: TransactionModel): void {
+    this.clearPress();
+    this.pressTimer = setTimeout(() => {
+      this.selectedTransaction = tx;
+      this.showEmojiPicker = true;
+    }, 2000);
+  }
+
+  clearPress(): void {
+    if (this.pressTimer) {
+      clearTimeout(this.pressTimer);
+      this.pressTimer = null;
+    }
+  }
+
+  async selectEmoji(event: any): Promise<void> {
+    if (!this.selectedTransaction?.id) {
+      this.showEmojiPicker = false;
+      return;
+    }
+
+    const emoji = event?.emoji?.native || event?.emoji?.colons || '';
+    if (!emoji) {
+      return;
+    }
+
+    try {
+      await this.paymentsService.updateTransactionEmoji(this.selectedTransaction.id, emoji);
+      await this.showToast('Emoji actualizado.', 'success');
+    } catch (error) {
+      console.error('Error actualizando emoji:', error);
+      await this.showToast('No se pudo actualizar el emoji.', 'danger');
+    } finally {
+      this.showEmojiPicker = false;
+      this.selectedTransaction = null;
+    }
+  }
+
+  closeEmojiPicker(): void {
+    this.showEmojiPicker = false;
+    this.selectedTransaction = null;
   }
 
   async showToast(message: string, color: 'success' | 'danger'): Promise<void> {

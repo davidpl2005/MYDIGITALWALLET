@@ -6,17 +6,21 @@
 
 <ion-content class="ion-padding">
   <ng-container *ngIf="!isLoading && user; else loadingTemplate">
+
+    <!-- Balance -->
     <app-balance-display
       [userName]="user.name"
       [balance]="user.balance || 0">
     </app-balance-display>
 
+    <!-- Acciones -->
     <app-quick-actions
       (addCard)="goToAddCard()"
       (goPayment)="goToPayment()"
       (logout)="logout()">
     </app-quick-actions>
 
+    <!-- Tarjetas -->
     <div class="cards-section">
       <h2>Mis tarjetas</h2>
 
@@ -52,6 +56,7 @@
       </ion-card>
     </div>
 
+    <!-- Transacciones -->
     <div class="transactions-section">
       <h2>Historial de transacciones</h2>
 
@@ -63,11 +68,27 @@
 
       <ion-list lines="none" *ngIf="transactions.length > 0">
         <ion-item-sliding *ngFor="let tx of transactions" #slidingItem>
-          <ion-item class="transaction-item" detail="false">
+
+          <ion-item
+            class="transaction-item"
+            detail="false"
+            (mousedown)="startPress(tx)"
+            (mouseup)="clearPress()"
+            (mouseleave)="clearPress()"
+            (touchstart)="startPress(tx)"
+            (touchend)="clearPress()"
+          >
             <div class="tx-row">
-              <div>
-                <h3>{{ tx.merchant }}</h3>
+              <div class="tx-left">
+                <h3>
+                  <span *ngIf="tx.emoji" class="tx-emoji">
+                    {{ tx.emoji }}
+                  </span>
+                  {{ tx.merchant }}
+                </h3>
+
                 <p>{{ getCardInfo(tx.cardId) }}</p>
+
                 <small>
                   {{ tx.date?.toDate ? (tx.date.toDate() | date:'short') : (tx.date | date:'short') }}
                 </small>
@@ -79,6 +100,7 @@
             </div>
           </ion-item>
 
+          <!-- Swipe eliminar -->
           <ion-item-options side="end">
             <ion-item-option
               color="danger"
@@ -87,9 +109,30 @@
               Eliminar
             </ion-item-option>
           </ion-item-options>
+
         </ion-item-sliding>
       </ion-list>
     </div>
+
+    <!-- Emoji Picker -->
+    <div class="emoji-picker-overlay" *ngIf="showEmojiPicker">
+      <div class="emoji-picker-card">
+        <div class="emoji-picker-header">
+          <h3>Selecciona un emoji</h3>
+
+          <ion-button fill="clear" size="small" (click)="closeEmojiPicker()">
+            Cerrar
+          </ion-button>
+        </div>
+
+        <emoji-mart
+          set="google"
+          title="Elegir emoji"
+          (emojiSelect)="selectEmoji($event)">
+        </emoji-mart>
+      </div>
+    </div>
+
   </ng-container>
 
   <ng-template #loadingTemplate>

@@ -27,6 +27,7 @@
     "@capacitor/haptics": "8.0.2",
     "@capacitor/keyboard": "8.0.3",
     "@capacitor/status-bar": "8.0.2",
+    "@ctrl/ngx-emoji-mart": "^9.3.0",
     "@ionic/angular": "^8.0.0",
     "firebase": "^11.10.0",
     "ionicons": "^7.0.0",

@@ -29,6 +29,10 @@ export class PaymentsService {
     return this.firestoreService.deleteDocument(this.path, transactionId);
   }
 
+  updateTransactionEmoji(transactionId: string, emoji: string) {
+    return this.firestoreService.updateDocument(this.path, transactionId, { emoji });
+  }
+
   getRandomMerchant(): string {
     const merchants = [
       'Amazon',
