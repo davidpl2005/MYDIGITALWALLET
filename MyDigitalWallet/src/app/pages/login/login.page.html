@@ -4,44 +4,75 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+<ion-content class="login-content">
+  <div class="hero">
+    <h1>Sign in to your Account</h1>
+    <p>Inicia sesión en tu cuenta</p>
+  </div>
 
-    <ion-item>
-      <ion-label position="stacked">Correo</ion-label>
-      <ion-input type="email" formControlName="email"></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['email'].touched && f['email'].invalid">
-      <small>Ingrese un correo válido.</small>
-    </ion-text>
+  <div class="form-wrapper">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
-    <ion-item>
-      <ion-label position="stacked">Contraseña</ion-label>
-      <ion-input type="password" formControlName="password"></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['password'].touched && f['password'].invalid">
-      <small>La contraseña debe tener mínimo 6 caracteres.</small>
-    </ion-text>
+      <ion-item>
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input type="email" formControlName="email"></ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="f['email'].touched && f['email'].invalid">
+        <small>Ingresa un correo válido.</small>
+      </ion-text>
 
-    <ion-text color="danger" *ngIf="errorMessage">
-      <p>{{ errorMessage }}</p>
-    </ion-text>
+      <ion-item>
+        <ion-label position="stacked">Password</ion-label>
+        <ion-input [type]="showPassword ? 'text' : 'password'" formControlName="password"></ion-input>
+        <ion-button fill="clear" slot="end" type="button" (click)="togglePassword()">
+          <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </ion-button>
+      </ion-item>
+      <ion-text color="danger" *ngIf="f['password'].touched && f['password'].invalid">
+        <small>La contraseña debe tener mínimo 6 caracteres.</small>
+      </ion-text>
 
-    <ion-button
-      expand="block"
-      type="submit"
-      class="ion-margin-top"
-      [disabled]="isSubmitting">
-      {{ isSubmitting ? 'Ingresando...' : 'Iniciar sesión' }}
-    </ion-button>
+      <ion-text color="danger" *ngIf="errorMessage">
+        <p>{{ errorMessage }}</p>
+      </ion-text>
 
-    <ion-button
-      expand="block"
-      fill="outline"
-      type="button"
-      class="ion-margin-top"
-      (click)="goToRegister()">
-      Ir a registro
-    </ion-button>
-  </form>
+      <ion-button
+        expand="block"
+        class="login-btn"
+        type="submit"
+        [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Ingresando...' : 'LOGIN' }}
+      </ion-button>
+
+      <div class="divider">
+        <span>Or login with</span>
+      </div>
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="google-btn"
+        type="button"
+        (click)="loginWithGoogle()">
+        <ion-icon name="logo-google"></ion-icon>
+        <span>GOOGLE</span>
+      </ion-button>
+
+      <div class="register-row">
+        <span>Don’t have an account?</span>
+        <button type="button" class="register-link" (click)="goToRegister()">Register</button>
+      </div>
+
+      <ion-button
+        *ngIf="canUseBiometrics"
+        expand="block"
+        fill="clear"
+        class="biometric-btn"
+        type="button"
+        (click)="loginWithBiometrics()">
+        <ion-icon name="finger-print-outline"></ion-icon>
+        <span>BIOMETRIC SIGN IN</span>
+      </ion-button>
+    </form>
+  </div>
 </ion-content>

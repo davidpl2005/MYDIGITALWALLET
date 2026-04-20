@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-
 import { AuthGuard } from './core/guards/auth-guard';
 import { AutoLoginGuard } from './core/guards/auto-login-guard';
 
@@ -39,6 +38,12 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./pages/payment/payment.module').then(m => m.PaymentPageModule)
+  },
+  {
+    path: 'transactions',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./pages/transactions/transactions.module').then(m => m.TransactionsPageModule)
   },
   {
     path: '**',

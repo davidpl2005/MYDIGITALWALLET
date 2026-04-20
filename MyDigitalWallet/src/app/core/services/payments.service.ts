@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core';
-import { collection, collectionData, Firestore, query, where, orderBy } from '@angular/fire/firestore';
+import {
+  collection,
+  collectionData,
+  Firestore,
+  query,
+  where,
+  orderBy,
+  Timestamp
+} from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { FirestoreService } from './firestore.service';
 import { TransactionModel } from 'src/app/interfaces/transaction.interface';
@@ -21,8 +29,67 @@ export class PaymentsService {
 
   getTransactionsByUser(userId: string): Observable<TransactionModel[]> {
     const ref = collection(this.firestore, this.path);
-    const q = query(ref, where('userId', '==', userId), orderBy('date', 'desc'));
+    const q = query(
+      ref,
+      where('userId', '==', userId),
+      orderBy('date', 'desc')
+    );
     return collectionData(q, { idField: 'id' }) as Observable<TransactionModel[]>;
+  }
+
+  getRecentTransactionsByUser(userId: string): Observable<TransactionModel[]> {
+    return this.getTransactionsByUser(userId);
+  }
+
+  getTransactionsByCard(userId: string, cardId: string): Observable<TransactionModel[]> {
+    const ref = collection(this.firestore, this.path);
+    const q = query(
+      ref,
+      where('userId', '==', userId),
+      where('cardId', '==', cardId),
+      orderBy('date', 'desc')
+    );
+    return collectionData(q, { idField: 'id' }) as Observable<TransactionModel[]>;
+  }
+
+  getTransactionsByUserAndDate(userId: string, selectedDate: string): Observable<TransactionModel[]> {
+    const { start, end } = this.buildLocalDayRange(selectedDate);
+
+    const ref = collection(this.firestore, this.path);
+    const q = query(
+      ref,
+      where('userId', '==', userId),
+      where('date', '>=', Timestamp.fromDate(start)),
+      where('date', '<=', Timestamp.fromDate(end)),
+      orderBy('date', 'desc')
+    );
+
+    return collectionData(q, { idField: 'id' }) as Observable<TransactionModel[]>;
+  }
+
+  getTransactionsByCardAndDate(userId: string, cardId: string, selectedDate: string): Observable<TransactionModel[]> {
+    const { start, end } = this.buildLocalDayRange(selectedDate);
+
+    const ref = collection(this.firestore, this.path);
+    const q = query(
+      ref,
+      where('userId', '==', userId),
+      where('cardId', '==', cardId),
+      where('date', '>=', Timestamp.fromDate(start)),
+      where('date', '<=', Timestamp.fromDate(end)),
+      orderBy('date', 'desc')
+    );
+
+    return collectionData(q, { idField: 'id' }) as Observable<TransactionModel[]>;
+  }
+
+  private buildLocalDayRange(selectedDate: string): { start: Date; end: Date } {
+    const [year, month, day] = selectedDate.split('-').map(Number);
+
+    const start = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const end = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+    return { start, end };
   }
 
   deleteTransaction(transactionId: string) {

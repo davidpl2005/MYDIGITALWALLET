@@ -1,0 +1,127 @@
+:host {
+  ion-content {
+    --background: #f3f3f3;
+  }
+}
+
+.account-box {
+  background: white;
+  border-radius: 22px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.account-left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.brand-badge {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #f2f2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.account-left p {
+  margin: 4px 0 0 0;
+  color: #666;
+}
+
+.total-box {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.total-box p {
+  margin: 0 0 6px 0;
+  color: #666;
+}
+
+.total-box h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 800;
+  color: #a3d02f;
+}
+
+ion-list {
+  background: transparent;
+  padding: 0;
+}
+
+.transaction-item {
+  --background: #ffffff;
+  --color: #111827;
+  --border-radius: 16px;
+  margin-bottom: 10px;
+}
+
+.tx-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.tx-left h3 {
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tx-left small {
+  color: #666;
+}
+
+.tx-amount {
+  font-size: 24px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.tx-emoji {
+  font-size: 20px;
+}
+
+.emoji-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.emoji-picker-card {
+  background: #111;
+  border-radius: 16px;
+  padding: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.emoji-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.emoji-picker-header h3 {
+  margin: 0;
+  color: white;
+}

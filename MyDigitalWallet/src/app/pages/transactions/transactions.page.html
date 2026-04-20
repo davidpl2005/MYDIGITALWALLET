@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Total Expenses</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="account-box" *ngIf="getSelectedCard() as selectedCard">
+    <div class="account-left">
+      <div class="brand-badge">{{ selectedCard.brand | uppercase }}</div>
+      <div>
+        <strong>{{ selectedCard.holderName }}</strong>
+        <p>{{ getMaskedCardNumber(selectedCard.cardNumber) }}</p>
+      </div>
+    </div>
+
+    <div class="account-right">
+      <ion-select [value]="selectedCardId" interface="popover" (ionChange)="onCardChange($event)">
+        <ion-select-option *ngFor="let card of cards" [value]="card.id">
+          {{ card.brand | uppercase }} - {{ getMaskedCardNumber(card.cardNumber) }}
+        </ion-select-option>
+      </ion-select>
+    </div>
+  </div>
+
+  <div class="total-box">
+    <p>Total Spend (By Card)</p>
+    <h1>$ {{ getTotalSpent() | number }}</h1>
+  </div>
+
+  <app-calendar
+    (dateSelected)="filterTransactionsByDate($event)"
+    (clearDate)="clearDateFilter()">
+  </app-calendar>
+
+  <ion-card *ngIf="transactions.length === 0">
+    <ion-card-content>
+      No hay transacciones para mostrar.
+    </ion-card-content>
+  </ion-card>
+
+  <ion-list lines="none" *ngIf="transactions.length > 0">
+    <ion-item-sliding *ngFor="let tx of transactions" #slidingItem>
+      <ion-item
+        class="transaction-item"
+        detail="false"
+        (mousedown)="startPress(tx)"
+        (mouseup)="clearPress()"
+        (mouseleave)="clearPress()"
+        (touchstart)="startPress(tx)"
+        (touchend)="clearPress()"
+      >
+        <div class="tx-row">
+          <div class="tx-left">
+            <h3>
+              <span *ngIf="tx.emoji" class="tx-emoji">{{ tx.emoji }}</span>
+              {{ tx.merchant }}
+            </h3>
+            <small>{{ formatTransactionDate(tx.date) }}</small>
+          </div>
+
+          <div class="tx-amount">
+            $ {{ tx.amount | number }}
+          </div>
+        </div>
+      </ion-item>
+
+      <ion-item-options side="end">
+        <ion-item-option
+          color="danger"
+          expandable
+          (click)="deleteTransaction(tx, slidingItem)">
+          Eliminar
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <div class="emoji-picker-overlay" *ngIf="showEmojiPicker">
+    <div class="emoji-picker-card">
+      <div class="emoji-picker-header">
+        <h3>Selecciona un emoji</h3>
+        <ion-button fill="clear" size="small" (click)="closeEmojiPicker()">
+          Cerrar
+        </ion-button>
+      </div>
+
+      <emoji-mart
+        set="google"
+        title="Elegir emoji"
+        (emojiSelect)="selectEmoji($event)">
+      </emoji-mart>
+    </div>
+  </div>
+</ion-content>

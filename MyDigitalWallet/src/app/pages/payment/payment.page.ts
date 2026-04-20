@@ -4,7 +4,10 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { CardService } from 'src/app/core/services/card.service';
 import { PaymentsService } from 'src/app/core/services/payments.service';
+import { UserService } from 'src/app/core/services/user.service';
+import { BiometricAuthService } from 'src/app/core/services/biometric-auth.service';
 import { CardModel } from 'src/app/interfaces/card.interface';
+import { AppUser } from 'src/app/interfaces/user.interface';
 
 @Component({
   selector: 'app-payment',
@@ -21,11 +24,14 @@ export class PaymentPage implements OnInit {
 
   currentUserId = '';
   isLoading = true;
+  userProfile: AppUser | null = null;
 
   constructor(
     private authService: AuthService,
     private cardService: CardService,
     private paymentsService: PaymentsService,
+    private userService: UserService,
+    private biometricAuthService: BiometricAuthService,
     private toastController: ToastController,
     private router: Router
   ) {}
@@ -43,6 +49,15 @@ export class PaymentPage implements OnInit {
     }
 
     this.currentUserId = currentUser.uid;
+
+    this.userService.getUserProfile(currentUser.uid).subscribe({
+      next: (profile) => {
+        this.userProfile = profile;
+      },
+      error: (error) => {
+        console.error('Error cargando perfil:', error);
+      }
+    });
 
     this.cardService.getCardsByUser(currentUser.uid).subscribe({
       next: (cards) => {
@@ -92,6 +107,15 @@ export class PaymentPage implements OnInit {
     if (!this.selectedCard || !this.selectedCard.id) {
       await this.showToast('No tienes tarjeta seleccionada', 'danger');
       return;
+    }
+
+    if (this.userProfile?.biometricEnabled) {
+      const authorized = await this.biometricAuthService.authenticate('Confirma tu identidad para procesar el pago');
+
+      if (!authorized) {
+        await this.showToast('Pago cancelado: autenticación requerida.', 'danger');
+        return;
+      }
     }
 
     try {

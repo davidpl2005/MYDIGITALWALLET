@@ -1,3 +1,18 @@
-<p>
-  calendar works!
-</p>
+<div class="calendar-filter">
+  <ion-datetime
+    class="calendar-inline"
+    presentation="date"
+    prefer-wheel="false"
+    [value]="selectedDate"
+    (ionChange)="onDateChange($event)">
+  </ion-datetime>
+
+  <ion-button
+    expand="block"
+    fill="outline"
+    color="medium"
+    class="clear-btn"
+    (click)="onClear()">
+    Limpiar filtro
+  </ion-button>
+</div>

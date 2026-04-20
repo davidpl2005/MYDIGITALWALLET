@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import {
   Auth,
   createUserWithEmailAndPassword,
@@ -6,14 +7,20 @@ import {
   signOut,
   UserCredential,
   onAuthStateChanged,
-  User
+  User,
+  GoogleAuthProvider,
+  signInWithCredential,
+  signInWithPopup
 } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
+import { GoogleSignIn } from '@capawesome/capacitor-google-sign-in';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private googleInitialized = false;
 
   constructor(private auth: Auth) {}
 
@@ -25,7 +32,36 @@ export class AuthService {
     return signInWithEmailAndPassword(this.auth, email, password);
   }
 
-  logout(): Promise<void> {
+  async loginWithGoogle(): Promise<UserCredential> {
+    const platform = Capacitor.getPlatform();
+
+    if (platform === 'web') {
+      const provider = new GoogleAuthProvider();
+      return signInWithPopup(this.auth, provider);
+    }
+
+    if (!this.googleInitialized) {
+      await GoogleSignIn.initialize({
+        clientId: environment.googleWebClientId
+      });
+      this.googleInitialized = true;
+    }
+
+    const result = await GoogleSignIn.signIn();
+    const credential = GoogleAuthProvider.credential(result.idToken);
+    return signInWithCredential(this.auth, credential);
+  }
+
+  async logout(): Promise<void> {
+    try {
+      const platform = Capacitor.getPlatform();
+      if (platform !== 'web') {
+        await GoogleSignIn.signOut();
+      }
+    } catch (error) {
+      console.warn('No fue posible cerrar sesión de Google plugin:', error);
+    }
+
     return signOut(this.auth);
   }
 

@@ -1,141 +1,184 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Home</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button fill="clear" class="profile-btn" (click)="openProfileModal()">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <ng-container *ngIf="!isLoading && user; else loadingTemplate">
 
-    <!-- Balance -->
-    <app-balance-display
-      [userName]="user.name"
-      [balance]="user.balance || 0">
-    </app-balance-display>
+    <div class="welcome-section">
+      <h1>Hola {{ user.name }}!</h1>
+      <p>Administra tu dinero.</p>
+    </div>
 
-    <!-- Acciones -->
-    <app-quick-actions
-      (addCard)="goToAddCard()"
-      (goPayment)="goToPayment()"
-      (logout)="logout()">
-    </app-quick-actions>
-
-    <!-- Tarjetas -->
-    <div class="cards-section">
-      <h2>Mis tarjetas</h2>
-
-      <ion-card *ngIf="cards.length === 0">
-        <ion-card-content>
-          No tienes tarjetas registradas.
-        </ion-card-content>
-      </ion-card>
-
-      <ion-card *ngFor="let card of cards">
-        <ion-card-header>
-          <div class="card-header-row">
-            <ion-card-title>
-              {{ card.brand === 'visa' ? 'Visa' : 'Mastercard' }}
-            </ion-card-title>
-
-            <div class="card-actions">
-              <ion-button size="small" fill="outline" (click)="editCard(card)">
-                Editar
-              </ion-button>
-              <ion-button size="small" color="danger" fill="outline" (click)="deleteCard(card)">
-                Eliminar
-              </ion-button>
-            </div>
+    <ng-container *ngIf="featuredCard; else noCardTemplate">
+      <div
+        class="featured-card"
+        [ngClass]="getCardClass(featuredCard)"
+      >
+        <div class="featured-card-top">
+          <div class="brand-label">
+            {{ featuredCard.brand | uppercase }}
           </div>
-        </ion-card-header>
 
-        <ion-card-content>
-          <p>{{ getMaskedCardNumber(card.cardNumber) }}</p>
-          <p>Titular: {{ card.holderName }}</p>
-          <p>Expira: {{ card.expiryDate }}</p>
-        </ion-card-content>
-      </ion-card>
-    </div>
-
-    <!-- Transacciones -->
-    <div class="transactions-section">
-      <h2>Historial de transacciones</h2>
-
-      <ion-card *ngIf="transactions.length === 0">
-        <ion-card-content>
-          No hay transacciones todavía.
-        </ion-card-content>
-      </ion-card>
-
-      <ion-list lines="none" *ngIf="transactions.length > 0">
-        <ion-item-sliding *ngFor="let tx of transactions" #slidingItem>
-
-          <ion-item
-            class="transaction-item"
-            detail="false"
-            (mousedown)="startPress(tx)"
-            (mouseup)="clearPress()"
-            (mouseleave)="clearPress()"
-            (touchstart)="startPress(tx)"
-            (touchend)="clearPress()"
-          >
-            <div class="tx-row">
-              <div class="tx-left">
-                <h3>
-                  <span *ngIf="tx.emoji" class="tx-emoji">
-                    {{ tx.emoji }}
-                  </span>
-                  {{ tx.merchant }}
-                </h3>
-
-                <p>{{ getCardInfo(tx.cardId) }}</p>
-
-                <small>
-                  {{ tx.date?.toDate ? (tx.date.toDate() | date:'short') : (tx.date | date:'short') }}
-                </small>
-              </div>
-
-              <div class="tx-amount">
-                $ {{ tx.amount | number }}
-              </div>
-            </div>
-          </ion-item>
-
-          <!-- Swipe eliminar -->
-          <ion-item-options side="end">
-            <ion-item-option
-              color="danger"
-              expandable
-              (click)="deleteTransaction(tx, slidingItem)">
+          <div class="featured-card-actions">
+            <ion-button fill="clear" size="small" (click)="editCard(featuredCard)">
+              Editar
+            </ion-button>
+            <ion-button fill="clear" size="small" color="light" (click)="deleteCard(featuredCard)">
               Eliminar
-            </ion-item-option>
-          </ion-item-options>
-
-        </ion-item-sliding>
-      </ion-list>
-    </div>
-
-    <!-- Emoji Picker -->
-    <div class="emoji-picker-overlay" *ngIf="showEmojiPicker">
-      <div class="emoji-picker-card">
-        <div class="emoji-picker-header">
-          <h3>Selecciona un emoji</h3>
-
-          <ion-button fill="clear" size="small" (click)="closeEmojiPicker()">
-            Cerrar
-          </ion-button>
+            </ion-button>
+          </div>
         </div>
 
-        <emoji-mart
-          set="google"
-          title="Elegir emoji"
-          (emojiSelect)="selectEmoji($event)">
-        </emoji-mart>
+        <div class="featured-card-number">
+          {{ getMaskedCardNumber(featuredCard.cardNumber) }}
+        </div>
+
+        <div class="featured-card-info">
+          <div>
+            <span class="label">Card Type</span>
+            <strong>{{ featuredCard.brand === 'visa' ? 'Visa' : 'Mastercard' }}</strong>
+          </div>
+
+          <div>
+            <span class="label">Exp. Date</span>
+            <strong>{{ featuredCard.expiryDate }}</strong>
+          </div>
+        </div>
+
+        <div class="featured-card-name">
+          <span class="label">Name</span>
+          <strong>{{ featuredCard.holderName }}</strong>
+        </div>
       </div>
+    </ng-container>
+
+    <ng-template #noCardTemplate>
+      <div class="no-card-box">
+        <div class="no-card-icon">💳</div>
+        <p>No cards available.</p>
+
+        <ion-button shape="round" color="medium" (click)="goToAddCard()">
+          + Add Card
+        </ion-button>
+      </div>
+    </ng-template>
+
+    <div class="quick-grid">
+      <button class="quick-box quick-box-cyan" (click)="openChangeCard()">
+        <span>📚</span>
+        <small>Change</small>
+      </button>
+
+      <button class="quick-box quick-box-lime" (click)="goToPayment()">
+        <span>💳</span>
+        <small>Pay Now</small>
+      </button>
+
+      <button class="quick-box quick-box-dark" (click)="goToAddCard()">
+        <span>＋</span>
+        <small>Add Card</small>
+      </button>
     </div>
+
+    <div class="history-header">
+      <h2>Card History</h2>
+      <button class="view-all-btn" (click)="goToTransactions()">
+        View All
+      </button>
+    </div>
+
+    <ion-card *ngIf="transactions.length === 0" class="empty-history-card">
+      <ion-card-content>
+        No transactions with this selected card.
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngFor="let tx of transactions" class="home-history-card">
+      <ion-card-content>
+        <div class="tx-row">
+          <div class="tx-left">
+            <h3>{{ tx.merchant }}</h3>
+            <p>{{ getCardInfo(tx.cardId) }}</p>
+            <small>
+              {{ tx.date?.toDate ? (tx.date.toDate() | date:'short') : (tx.date | date:'short') }}
+            </small>
+          </div>
+
+          <div class="tx-amount">
+            $ {{ tx.amount | number }}
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
 
   </ng-container>
 
   <ng-template #loadingTemplate>
-    <p>Cargando perfil...</p>
+    <p>Cargando...</p>
   </ng-template>
+
+  <ion-modal [isOpen]="profileModalOpen" (didDismiss)="closeProfileModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Mi perfil</ion-title>
+
+          <ion-buttons slot="end">
+            <ion-button (click)="closeProfileModal()">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar">💳</div>
+          <h2>{{ profileForm.get('name')?.value }} {{ profileForm.get('lastName')?.value }}</h2>
+          <p>App VIP Member</p>
+        </div>
+
+        <form [formGroup]="profileForm">
+          <ion-item>
+            <ion-label position="stacked">Nombre</ion-label>
+            <ion-input formControlName="name"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Apellido</ion-label>
+            <ion-input formControlName="lastName"></ion-input>
+          </ion-item>
+
+          <ion-item lines="none" class="bio-item">
+            <ion-label>Biometría</ion-label>
+            <ion-toggle formControlName="biometricEnabled"></ion-toggle>
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            class="save-btn"
+            (click)="saveProfile()"
+            [disabled]="isSavingProfile">
+            {{ isSavingProfile ? 'Guardando...' : 'Guardar cambios' }}
+          </ion-button>
+        </form>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          color="danger"
+          class="logout-modal-btn"
+          (click)="logout()">
+          Cerrar sesión
+        </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
