@@ -30,8 +30,27 @@ export class HomePage implements OnInit {
   transactionsSub?: Subscription;
 
   profileModalOpen = false;
+  changeCardModalOpen = false;
+  editCardModalOpen = false;
+
   profileForm!: FormGroup;
+  editCardForm!: FormGroup;
+
   isSavingProfile = false;
+  isChangingCard = false;
+  isSavingCard = false;
+
+  currentCarouselIndex = 0;
+
+  touchStartX = 0;
+  touchEndX = 0;
+
+  editingCard: CardModel | null = null;
+
+  editPreviewHolderName = 'YOUR NAME';
+  editPreviewCardNumber = 'XXXX XXXX XXXX XXXX';
+  editPreviewExpiryDate = 'MM/YY';
+  editPreviewBrand: 'visa' | 'mastercard' | 'unknown' = 'unknown';
 
   constructor(
     private authService: AuthService,
@@ -47,6 +66,8 @@ export class HomePage implements OnInit {
 
   ngOnInit(): void {
     this.initProfileForm();
+    this.initEditCardForm();
+    this.listenEditPreviewChanges();
     this.loadData();
   }
 
@@ -55,6 +76,35 @@ export class HomePage implements OnInit {
       name: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
       biometricEnabled: [false]
+    });
+  }
+
+  initEditCardForm(): void {
+    this.editCardForm = this.fb.group({
+      holderName: ['', [Validators.required, Validators.minLength(3)]],
+      cardNumber: ['', [Validators.required]],
+      expiryDate: ['', [Validators.required]]
+    });
+  }
+
+  listenEditPreviewChanges(): void {
+    this.editCardForm.get('holderName')?.valueChanges.subscribe((value: string) => {
+      this.editPreviewHolderName = value?.trim() ? value.trim() : 'YOUR NAME';
+    });
+
+    this.editCardForm.get('cardNumber')?.valueChanges.subscribe((value: string) => {
+      const formatted = this.cardService.formatCardNumber(value || '');
+      this.editCardForm.get('cardNumber')?.setValue(formatted, { emitEvent: false });
+
+      this.editPreviewCardNumber = formatted || 'XXXX XXXX XXXX XXXX';
+      this.editPreviewBrand = this.cardService.detectBrand(formatted);
+    });
+
+    this.editCardForm.get('expiryDate')?.valueChanges.subscribe((value: string) => {
+      const formatted = this.cardService.formatExpiryDate(value || '');
+      this.editCardForm.get('expiryDate')?.setValue(formatted, { emitEvent: false });
+
+      this.editPreviewExpiryDate = formatted || 'MM/YY';
     });
   }
 
@@ -101,6 +151,10 @@ export class HomePage implements OnInit {
 
         this.featuredCard = selectedCard;
         this.selectedCardId = selectedCard.id || '';
+        this.currentCarouselIndex = this.cards.findIndex(card => card.id === this.selectedCardId);
+        if (this.currentCarouselIndex < 0) {
+          this.currentCarouselIndex = 0;
+        }
         this.loadTransactionsForSelectedCard();
       },
       error: (error) => {
@@ -134,7 +188,8 @@ export class HomePage implements OnInit {
   }
 
   getMaskedCardNumber(cardNumber: string): string {
-    const last4 = cardNumber.slice(-4);
+    const digits = (cardNumber || '').replace(/\s/g, '');
+    const last4 = digits.slice(-4);
     return `**** **** **** ${last4}`;
   }
 
@@ -161,44 +216,110 @@ export class HomePage implements OnInit {
     return `${card.brand.toUpperCase()} - **** ${last4}`;
   }
 
-  async openChangeCard(): Promise<void> {
+  getGreeting(): string {
+    const hour = new Date().getHours();
+
+    if (hour < 12) {
+      return 'Buenos días';
+    }
+
+    if (hour < 19) {
+      return 'Buenas tardes';
+    }
+
+    return 'Buenas noches';
+  }
+
+  openChangeCardModal(): void {
     if (this.cards.length === 0) {
-      await this.showToast('No tienes tarjetas registradas.', 'danger');
+      this.showToast('No tienes tarjetas registradas.', 'danger');
       return;
     }
 
-    const alert = await this.alertController.create({
-      header: 'Seleccionar tarjeta',
-      inputs: this.cards.map((card) => ({
-        type: 'radio',
-        label: `${card.brand.toUpperCase()} - ${this.getMaskedCardNumber(card.cardNumber)}`,
-        value: card.id,
-        checked: card.id === this.selectedCardId
-      })),
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Seleccionar',
-          handler: (selectedId: string) => {
-            const selected = this.cards.find(card => card.id === selectedId);
-            if (!selected) {
-              return false;
-            }
+    this.currentCarouselIndex = this.cards.findIndex(card => card.id === this.selectedCardId);
+    if (this.currentCarouselIndex < 0) {
+      this.currentCarouselIndex = 0;
+    }
 
-            this.selectedCardId = selectedId;
-            this.featuredCard = selected;
-            localStorage.setItem(this.getSelectedCardStorageKey(), selectedId);
-            this.loadTransactionsForSelectedCard();
-            return true;
-          }
-        }
-      ]
-    });
+    this.changeCardModalOpen = true;
+  }
 
-    await alert.present();
+  closeChangeCardModal(): void {
+    this.changeCardModalOpen = false;
+    this.isChangingCard = false;
+  }
+
+  getCurrentCarouselCard(): CardModel | null {
+    if (!this.cards.length) {
+      return null;
+    }
+
+    return this.cards[this.currentCarouselIndex] || null;
+  }
+
+  onCardTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.changedTouches[0].screenX;
+  }
+
+  onCardTouchEnd(event: TouchEvent): void {
+    this.touchEndX = event.changedTouches[0].screenX;
+    this.handleCardSwipe();
+  }
+
+  handleCardSwipe(): void {
+    const delta = this.touchEndX - this.touchStartX;
+
+    if (Math.abs(delta) < 50) {
+      return;
+    }
+
+    if (delta < 0) {
+      this.nextCarouselCard();
+    } else {
+      this.previousCarouselCard();
+    }
+  }
+
+  nextCarouselCard(): void {
+    if (!this.cards.length) {
+      return;
+    }
+
+    this.currentCarouselIndex =
+      this.currentCarouselIndex === this.cards.length - 1 ? 0 : this.currentCarouselIndex + 1;
+  }
+
+  previousCarouselCard(): void {
+    if (!this.cards.length) {
+      return;
+    }
+
+    this.currentCarouselIndex =
+      this.currentCarouselIndex === 0 ? this.cards.length - 1 : this.currentCarouselIndex - 1;
+  }
+
+  async applyCurrentCarouselCard(): Promise<void> {
+    const selected = this.getCurrentCarouselCard();
+
+    if (!selected || !selected.id) {
+      return;
+    }
+
+    if (selected.id === this.selectedCardId) {
+      this.closeChangeCardModal();
+      return;
+    }
+
+    this.isChangingCard = true;
+
+    this.selectedCardId = selected.id;
+    this.featuredCard = selected;
+    localStorage.setItem(this.getSelectedCardStorageKey(), selected.id);
+    this.loadTransactionsForSelectedCard();
+
+    setTimeout(() => {
+      this.closeChangeCardModal();
+    }, 260);
   }
 
   goToAddCard(): void {
@@ -236,6 +357,99 @@ export class HomePage implements OnInit {
 
   closeProfileModal(): void {
     this.profileModalOpen = false;
+  }
+
+  openEditCardModal(card: CardModel): void {
+    this.editingCard = card;
+
+    const formattedNumber = this.cardService.formatCardNumber(card.cardNumber);
+
+    this.editCardForm.patchValue({
+      holderName: card.holderName,
+      cardNumber: formattedNumber,
+      expiryDate: card.expiryDate
+    });
+
+    this.editPreviewHolderName = card.holderName || 'YOUR NAME';
+    this.editPreviewCardNumber = formattedNumber || 'XXXX XXXX XXXX XXXX';
+    this.editPreviewExpiryDate = card.expiryDate || 'MM/YY';
+    this.editPreviewBrand = card.brand || 'unknown';
+
+    this.editCardModalOpen = true;
+  }
+
+  closeEditCardModal(): void {
+    this.editCardModalOpen = false;
+    this.editingCard = null;
+    this.isSavingCard = false;
+  }
+
+  getEditPreviewClass(): string {
+    if (this.editPreviewBrand === 'visa') {
+      return 'preview-visa';
+    }
+
+    if (this.editPreviewBrand === 'mastercard') {
+      return 'preview-mastercard';
+    }
+
+    return 'preview-default';
+  }
+
+  async saveEditedCard(): Promise<void> {
+    if (this.editCardForm.invalid || !this.editingCard?.id) {
+      this.editCardForm.markAllAsTouched();
+      return;
+    }
+
+    const holderName = this.editCardForm.value.holderName.trim();
+    const cardNumberFormatted = this.cardService.formatCardNumber(this.editCardForm.value.cardNumber);
+    const expiryDateFormatted = this.cardService.formatExpiryDate(this.editCardForm.value.expiryDate);
+    const detectedBrand = this.cardService.detectBrand(cardNumberFormatted);
+
+    if (!this.cardService.isValidLuhn(cardNumberFormatted)) {
+      await this.showToast('Número de tarjeta inválido.', 'danger');
+      return;
+    }
+
+    if (!this.cardService.isValidExpiryDate(expiryDateFormatted)) {
+      await this.showToast('Fecha de expiración inválida.', 'danger');
+      return;
+    }
+
+    if (detectedBrand === 'unknown') {
+      await this.showToast('Solo se permiten Visa o Mastercard.', 'danger');
+      return;
+    }
+
+    this.isSavingCard = true;
+
+    try {
+      await this.cardService.updateCard(this.editingCard.id, {
+        holderName,
+        cardNumber: cardNumberFormatted.replace(/\s/g, ''),
+        expiryDate: expiryDateFormatted,
+        brand: detectedBrand
+      });
+
+      if (this.featuredCard?.id === this.editingCard.id) {
+        this.featuredCard = {
+          ...this.featuredCard,
+          holderName,
+          cardNumber: cardNumberFormatted.replace(/\s/g, ''),
+          expiryDate: expiryDateFormatted,
+          brand: detectedBrand
+        };
+      }
+
+      await this.showToast('Tarjeta actualizada correctamente.', 'success');
+      this.closeEditCardModal();
+    } catch (error) {
+      console.error('Error actualizando tarjeta:', error);
+      await this.showToast('No se pudo actualizar la tarjeta.', 'danger');
+    } finally {
+      this.isSavingCard = false;
+    }
   }
 
   async askCurrentPassword(): Promise<string | null> {
@@ -322,89 +536,6 @@ export class HomePage implements OnInit {
   async logout(): Promise<void> {
     await this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  async editCard(card: CardModel): Promise<void> {
-    const alert = await this.alertController.create({
-      header: 'Editar tarjeta',
-      inputs: [
-        {
-          name: 'holderName',
-          type: 'text',
-          placeholder: 'Nombre del titular',
-          value: card.holderName
-        },
-        {
-          name: 'cardNumber',
-          type: 'text',
-          placeholder: 'Número de tarjeta',
-          value: this.cardService.formatCardNumber(card.cardNumber)
-        },
-        {
-          name: 'expiryDate',
-          type: 'text',
-          placeholder: 'MM/YY',
-          value: card.expiryDate
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Guardar',
-          handler: async (data) => {
-            const formattedNumber = this.cardService.formatCardNumber(data.cardNumber || '');
-            const formattedExpiry = this.cardService.formatExpiryDate(data.expiryDate || '');
-            const detectedBrand = this.cardService.detectBrand(formattedNumber);
-
-            if (!data.holderName || !formattedNumber || !formattedExpiry) {
-              await this.showToast('Todos los campos son obligatorios.', 'danger');
-              return false;
-            }
-
-            if (!this.cardService.isValidLuhn(formattedNumber)) {
-              await this.showToast('Número de tarjeta inválido.', 'danger');
-              return false;
-            }
-
-            if (!this.cardService.isValidExpiryDate(formattedExpiry)) {
-              await this.showToast('Fecha de expiración inválida.', 'danger');
-              return false;
-            }
-
-            if (detectedBrand === 'unknown') {
-              await this.showToast('Solo se permiten Visa o Mastercard.', 'danger');
-              return false;
-            }
-
-            if (!card.id) {
-              await this.showToast('No se encontró el id de la tarjeta.', 'danger');
-              return false;
-            }
-
-            try {
-              await this.cardService.updateCard(card.id, {
-                holderName: data.holderName,
-                cardNumber: formattedNumber.replace(/\s/g, ''),
-                expiryDate: formattedExpiry,
-                brand: detectedBrand
-              });
-
-              await this.showToast('Tarjeta actualizada correctamente.', 'success');
-              return true;
-            } catch (error) {
-              console.error('Error actualizando tarjeta:', error);
-              await this.showToast('No se pudo actualizar la tarjeta.', 'danger');
-              return false;
-            }
-          }
-        }
-      ]
-    });
-
-    await alert.present();
   }
 
   async deleteCard(card: CardModel): Promise<void> {

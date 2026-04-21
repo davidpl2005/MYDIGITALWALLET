@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { CardService } from 'src/app/core/services/card.service';
+import { CardModel } from 'src/app/interfaces/card.interface';
 
 @Component({
   selector: 'app-add-card',
@@ -13,24 +15,29 @@ import { CardService } from 'src/app/core/services/card.service';
 export class AddCardPage implements OnInit {
   cardForm!: FormGroup;
   isSubmitting = false;
-  detectedBrand: 'visa' | 'mastercard' | 'unknown' = 'unknown';
-  errorMessage = '';
+
+  previewHolderName = 'YOUR NAME';
+  previewCardNumber = 'XXXX XXXX XXXX XXXX';
+  previewExpiryDate = 'MM/YY';
+  previewBrand: 'visa' | 'mastercard' | 'unknown' = 'unknown';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private cardService: CardService,
+    private toastController: ToastController,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.initForm();
+    this.listenPreviewChanges();
   }
 
   initForm(): void {
     this.cardForm = this.fb.group({
-      holderName: ['', [Validators.required]],
-      cardNumber: ['', [Validators.required, Validators.minLength(19)]],
+      holderName: ['', [Validators.required, Validators.minLength(3)]],
+      cardNumber: ['', [Validators.required]],
       expiryDate: ['', [Validators.required]],
       cvv: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(4)]]
     });
@@ -40,20 +47,42 @@ export class AddCardPage implements OnInit {
     return this.cardForm.controls;
   }
 
-  onCardNumberInput(event: any): void {
-    const formatted = this.cardService.formatCardNumber(event.target.value);
-    this.cardForm.get('cardNumber')?.setValue(formatted, { emitEvent: false });
-    this.detectedBrand = this.cardService.detectBrand(formatted);
+  listenPreviewChanges(): void {
+    this.cardForm.get('holderName')?.valueChanges.subscribe((value: string) => {
+      this.previewHolderName = value?.trim() ? value.trim().toUpperCase() : 'YOUR NAME';
+    });
+
+    this.cardForm.get('cardNumber')?.valueChanges.subscribe((value: string) => {
+      const formatted = this.cardService.formatCardNumber(value || '');
+      this.cardForm.get('cardNumber')?.setValue(formatted, { emitEvent: false });
+
+      this.previewCardNumber = formatted || 'XXXX XXXX XXXX XXXX';
+      this.previewBrand = this.cardService.detectBrand(formatted);
+    });
+
+    this.cardForm.get('expiryDate')?.valueChanges.subscribe((value: string) => {
+      const formatted = this.cardService.formatExpiryDate(value || '');
+      this.cardForm.get('expiryDate')?.setValue(formatted, { emitEvent: false });
+
+      this.previewExpiryDate = formatted || 'MM/YY';
+    });
+
+    this.cardForm.get('cvv')?.valueChanges.subscribe((value: string) => {
+      const digits = (value || '').replace(/\D/g, '').substring(0, 4);
+      this.cardForm.get('cvv')?.setValue(digits, { emitEvent: false });
+    });
   }
 
-  onExpiryInput(event: any): void {
-    const formatted = this.cardService.formatExpiryDate(event.target.value);
-    this.cardForm.get('expiryDate')?.setValue(formatted, { emitEvent: false });
-  }
+  getPreviewCardClass(): string {
+    if (this.previewBrand === 'visa') {
+      return 'preview-visa';
+    }
 
-  onCvvInput(event: any): void {
-    const digits = event.target.value.replace(/\D/g, '').substring(0, 4);
-    this.cardForm.get('cvv')?.setValue(digits, { emitEvent: false });
+    if (this.previewBrand === 'mastercard') {
+      return 'preview-mastercard';
+    }
+
+    return 'preview-default';
   }
 
   async onSubmit(): Promise<void> {
@@ -62,52 +91,75 @@ export class AddCardPage implements OnInit {
       return;
     }
 
-    this.errorMessage = '';
-
     const currentUser = this.authService.getCurrentUser();
+
     if (!currentUser) {
+      await this.showToast('Sesión no válida.', 'danger');
       this.router.navigate(['/login']);
       return;
     }
 
-    const formValue = this.cardForm.value;
+    const holderName = this.cardForm.value.holderName.trim();
+    const cardNumberFormatted = this.cardService.formatCardNumber(this.cardForm.value.cardNumber);
+    const expiryDateFormatted = this.cardService.formatExpiryDate(this.cardForm.value.expiryDate);
+    const cvv = this.cardForm.value.cvv;
+    const detectedBrand = this.cardService.detectBrand(cardNumberFormatted);
 
-    if (!this.cardService.isValidLuhn(formValue.cardNumber)) {
-      this.errorMessage = 'El número de tarjeta no es válido según Luhn.';
+    if (!this.cardService.isValidLuhn(cardNumberFormatted)) {
+      await this.showToast('Número de tarjeta inválido.', 'danger');
       return;
     }
 
-    if (!this.cardService.isValidExpiryDate(formValue.expiryDate)) {
-      this.errorMessage = 'La fecha de expiración no es válida.';
+    if (!this.cardService.isValidExpiryDate(expiryDateFormatted)) {
+      await this.showToast('Fecha de expiración inválida.', 'danger');
       return;
     }
 
-    if (this.detectedBrand === 'unknown') {
-      this.errorMessage = 'Solo se permiten tarjetas Visa o Mastercard.';
+    if (detectedBrand === 'unknown') {
+      await this.showToast('Solo se permiten Visa o Mastercard.', 'danger');
       return;
     }
 
     this.isSubmitting = true;
 
     try {
-      await this.cardService.createCard({
+      const cardData: CardModel = {
         userId: currentUser.uid,
-        holderName: formValue.holderName,
-        cardNumber: formValue.cardNumber.replace(/\s/g, ''),
-        brand: this.detectedBrand,
-        expiryDate: formValue.expiryDate,
-        cvv: formValue.cvv,
+        holderName,
+        cardNumber: cardNumberFormatted.replace(/\s/g, ''),
+        expiryDate: expiryDateFormatted,
+        cvv,
+        brand: detectedBrand,
         createdAt: new Date()
-      });
+      };
 
+      await this.cardService.createCard(cardData);
+
+      await this.showToast('Tarjeta agregada correctamente.', 'success');
       this.cardForm.reset();
-      this.detectedBrand = 'unknown';
+
+      this.previewHolderName = 'YOUR NAME';
+      this.previewCardNumber = 'XXXX XXXX XXXX XXXX';
+      this.previewExpiryDate = 'MM/YY';
+      this.previewBrand = 'unknown';
+
       this.router.navigate(['/home']);
     } catch (error) {
-      console.error('Error guardando tarjeta:', error);
-      this.errorMessage = 'No se pudo guardar la tarjeta.';
+      console.error('Error agregando tarjeta:', error);
+      await this.showToast('No se pudo agregar la tarjeta.', 'danger');
     } finally {
       this.isSubmitting = false;
     }
+  }
+
+  async showToast(message: string, color: 'success' | 'danger'): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2200,
+      color,
+      position: 'top'
+    });
+
+    await toast.present();
   }
 }

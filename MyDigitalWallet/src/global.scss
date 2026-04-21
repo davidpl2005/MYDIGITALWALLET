@@ -1,37 +1,277 @@
-/*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
- */
-
-/* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
 
-/* Optional CSS utils that can be commented out */
-@import "@ionic/angular/css/padding.css";
-@import "@ionic/angular/css/float-elements.css";
-@import "@ionic/angular/css/text-alignment.css";
-@import "@ionic/angular/css/text-transformation.css";
-@import "@ionic/angular/css/flex-utils.css";
+html,
+body,
+ion-app,
+ion-content {
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+}
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+body {
+  background: var(--app-background);
+  color: var(--app-text);
+}
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+ion-content {
+  --background: var(--app-background);
+  --color: var(--app-text);
+}
+
+ion-toolbar {
+  --background: rgba(255, 255, 255, 0.92);
+  --color: var(--app-text);
+  --border-color: transparent;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 rgba(226, 232, 240, 0.9);
+}
+
+ion-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--app-text);
+}
+
+ion-header ion-button {
+  --color: var(--app-text);
+}
+
+ion-card {
+  margin: 0 0 14px 0;
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow-soft);
+  border: 1px solid var(--app-border);
+}
+
+ion-card-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--app-text);
+}
+
+ion-card-content,
+ion-card-header {
+  color: var(--app-text);
+}
+
+ion-item {
+  --background: var(--app-surface);
+  --color: var(--app-text);
+  --border-color: transparent;
+  --highlight-color-focused: var(--ion-color-primary);
+  --border-radius: var(--radius-md);
+  --padding-start: 14px;
+  --inner-padding-end: 12px;
+  --min-height: 58px;
+  margin-bottom: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--app-shadow-soft);
+}
+
+ion-item ion-label {
+  color: var(--app-text-soft) !important;
+  font-weight: 600;
+}
+
+ion-input,
+ion-select,
+ion-textarea,
+ion-datetime {
+  --color: var(--app-text);
+  color: var(--app-text);
+}
+
+ion-button {
+  --border-radius: 18px;
+  --box-shadow: 0 10px 20px rgba(37, 99, 235, 0.16);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  text-transform: none;
+  min-height: 50px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+ion-button:hover,
+ion-button:focus {
+  transform: translateY(-1px);
+}
+
+ion-button:active {
+  transform: scale(0.98);
+}
+
+ion-button[color="primary"] {
+  --background: linear-gradient(135deg, #2563eb, #3b82f6);
+  --color: #ffffff;
+}
+
+ion-button[color="danger"] {
+  --background: linear-gradient(135deg, #ef4444, #f87171);
+  --color: #ffffff;
+}
+
+ion-button[color="success"] {
+  --background: linear-gradient(135deg, #84cc16, #a3e635);
+  --color: #111827;
+}
+
+ion-button[fill="outline"] {
+  --border-color: #cbd5e1;
+  --color: var(--app-text);
+  --background: #ffffff;
+  --box-shadow: none;
+}
+
+ion-modal {
+  --border-radius: 28px 28px 0 0;
+  --box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+}
+
+ion-modal::part(content) {
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  overflow: hidden;
+}
+
+ion-list {
+  background: transparent;
+}
+
+ion-item-sliding {
+  margin-bottom: 12px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+ion-item-option {
+  font-weight: 800;
+}
+
+ion-toggle {
+  --background: #dbeafe;
+  --background-checked: #84cc16;
+  --handle-background: #ffffff;
+  --handle-background-checked: #ffffff;
+}
+
+ion-text[color="danger"] {
+  display: block;
+  margin: 4px 6px 12px;
+  font-size: 13px;
+}
+
+.page-enter {
+  animation: fadeSlideUp 0.45s ease both;
+}
+
+.surface-soft {
+  background: var(--app-surface-soft);
+  border-radius: var(--radius-lg);
+}
+
+.section-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--app-text);
+  margin: 0;
+}
+
+.section-subtitle {
+  font-size: 15px;
+  color: var(--app-text-soft);
+  margin-top: 6px;
+}
+
+.card-gradient-visa {
+  background: linear-gradient(135deg, var(--card-visa-start), var(--card-visa-end));
+  color: white;
+}
+
+.card-gradient-master {
+  background: linear-gradient(135deg, var(--card-master-start), var(--card-master-end));
+  color: white;
+}
+
+.card-gradient-default {
+  background: linear-gradient(135deg, var(--card-default-start), var(--card-default-end));
+  color: white;
+}
+
+.fade-in {
+  animation: fadeIn 0.35s ease both;
+}
+
+.scale-in {
+  animation: scaleIn 0.28s ease both;
+}
+
+.slide-up {
+  animation: fadeSlideUp 0.4s ease both;
+}
+
+.stagger-1 {
+  animation-delay: 0.05s;
+}
+
+.stagger-2 {
+  animation-delay: 0.1s;
+}
+
+.stagger-3 {
+  animation-delay: 0.15s;
+}
+
+.stagger-4 {
+  animation-delay: 0.2s;
+}
+
+.icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: var(--ion-color-primary);
+}
+
+.icon-circle ion-icon {
+  font-size: 22px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,9 +1,124 @@
-ion-item {
-  margin-bottom: 8px;
+:host {
+  ion-content {
+    --background: var(--app-background);
+  }
 }
 
-ion-text {
+.page-copy {
+  margin-bottom: 18px;
+}
+
+.page-copy p {
+  margin: 0;
+  color: var(--app-text-soft);
+  font-size: 16px;
+}
+
+.card-preview {
+  border-radius: 30px;
+  padding: 22px;
+  color: white;
+  margin-bottom: 26px;
+  box-shadow: var(--app-shadow);
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.22s ease;
+}
+
+.preview-visa {
+  background: linear-gradient(135deg, var(--card-visa-start), var(--card-visa-end));
+}
+
+.preview-mastercard {
+  background: linear-gradient(135deg, var(--card-master-start), var(--card-master-end));
+}
+
+.preview-default {
+  background: linear-gradient(135deg, #64748b, #94a3b8);
+}
+
+.preview-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-type {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.preview-name-label {
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.82;
+  letter-spacing: 1px;
+  margin-top: 10px;
+}
+
+.preview-number {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  line-height: 1.2;
+  margin: 14px 0 8px;
+  word-break: break-word;
+}
+
+.preview-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.preview-holder span,
+.preview-expiry span {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+form {
+  padding-bottom: 28px;
+}
+
+.field-group {
+  margin-bottom: 14px;
+}
+
+.field-group label {
   display: block;
-  margin-bottom: 10px;
-  margin-left: 4px;
+  margin: 0 0 8px 2px;
+  color: var(--app-text-soft);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+.double-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.submit-btn {
+  margin-top: 18px;
+  min-height: 56px;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 420px) {
+  .preview-number {
+    font-size: 24px;
+    letter-spacing: 2px;
+  }
+
+  .preview-holder span,
+  .preview-expiry span {
+    font-size: 18px;
+  }
 }

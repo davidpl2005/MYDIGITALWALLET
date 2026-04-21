@@ -40,6 +40,10 @@ export class PaymentPage implements OnInit {
     this.loadData();
   }
 
+  getSelectedCardStorageKey(): string {
+    return `selected_card_${this.currentUserId}`;
+  }
+
   loadData(): void {
     const currentUser = this.authService.getCurrentUser();
 
@@ -63,9 +67,15 @@ export class PaymentPage implements OnInit {
       next: (cards) => {
         this.cards = cards;
 
-        if (cards.length > 0) {
-          this.selectedCard = cards[0];
+        if (!cards.length) {
+          this.isLoading = false;
+          return;
         }
+
+        const savedCardId = localStorage.getItem(this.getSelectedCardStorageKey());
+        const selectedFromStorage = cards.find(card => card.id === savedCardId);
+
+        this.selectedCard = selectedFromStorage || cards[0];
 
         this.generateSimulation();
         this.isLoading = false;
@@ -83,7 +93,8 @@ export class PaymentPage implements OnInit {
   }
 
   getMaskedCardNumber(cardNumber: string): string {
-    const last4 = cardNumber.slice(-4);
+    const digits = (cardNumber || '').replace(/\s/g, '');
+    const last4 = digits.slice(-4);
     return `**** **** **** ${last4}`;
   }
 
@@ -99,13 +110,13 @@ export class PaymentPage implements OnInit {
     return 'default-card';
   }
 
-  changeCard(card: CardModel): void {
-    this.selectedCard = card;
+  goToHome(): void {
+    this.router.navigate(['/home']);
   }
 
   async confirmPayment(): Promise<void> {
     if (!this.selectedCard || !this.selectedCard.id) {
-      await this.showToast('No tienes tarjeta seleccionada', 'danger');
+      await this.showToast('No tienes tarjeta seleccionada.', 'danger');
       return;
     }
 
@@ -128,18 +139,18 @@ export class PaymentPage implements OnInit {
         type: 'payment'
       });
 
-      await this.showToast('Pago realizado correctamente', 'success');
+      await this.showToast('Pago realizado correctamente.', 'success');
       this.router.navigate(['/home']);
     } catch (error) {
       console.error('Error al procesar pago:', error);
-      await this.showToast('Error al procesar pago', 'danger');
+      await this.showToast('Error al procesar pago.', 'danger');
     }
   }
 
   async showToast(message: string, color: 'success' | 'danger'): Promise<void> {
     const toast = await this.toastController.create({
       message,
-      duration: 2000,
+      duration: 2200,
       color,
       position: 'top'
     });

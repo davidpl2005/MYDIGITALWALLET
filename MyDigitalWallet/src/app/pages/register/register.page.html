@@ -1,90 +1,124 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Registro</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="register-content">
 
-<ion-content class="ion-padding">
-  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+  <div class="register-header fade-in">
+    <h1>Create Account</h1>
+    <p>Registra tu información para comenzar</p>
+  </div>
 
-    <ion-item>
-      <ion-label position="stacked">Nombre</ion-label>
-      <ion-input formControlName="name"></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['name'].touched && f['name'].invalid">
-      <small>El nombre es obligatorio.</small>
-    </ion-text>
+  <div class="register-card slide-up">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-    <ion-item>
-      <ion-label position="stacked">Apellido</ion-label>
-      <ion-input formControlName="lastName"></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['lastName'].touched && f['lastName'].invalid">
-      <small>El apellido es obligatorio.</small>
-    </ion-text>
+      <div class="input-group">
+        <ion-icon name="person-outline"></ion-icon>
+        <ion-input
+          placeholder="Nombre"
+          formControlName="name">
+        </ion-input>
+      </div>
+      <ion-text color="danger" *ngIf="f['name'].touched && f['name'].invalid">
+        <small>Ingresa tu nombre.</small>
+      </ion-text>
 
-    <ion-item>
-      <ion-label position="stacked">Tipo de documento</ion-label>
-      <ion-select formControlName="documentType" interface="popover">
-        <ion-select-option *ngFor="let type of documentTypes" [value]="type">
-          {{ type }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['documentType'].touched && f['documentType'].invalid">
-      <small>Seleccione un tipo de documento.</small>
-    </ion-text>
+      <div class="input-group">
+        <ion-icon name="person-outline"></ion-icon>
+        <ion-input
+          placeholder="Apellido"
+          formControlName="lastName">
+        </ion-input>
+      </div>
+      <ion-text color="danger" *ngIf="f['lastName'].touched && f['lastName'].invalid">
+        <small>Ingresa tu apellido.</small>
+      </ion-text>
 
-    <ion-item>
-      <ion-label position="stacked">Número de documento</ion-label>
-      <ion-input formControlName="documentNumber"></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['documentNumber'].touched && f['documentNumber'].invalid">
-      <small>El número de documento es obligatorio.</small>
-    </ion-text>
+      <div class="input-group">
+        <ion-icon name="card-outline"></ion-icon>
+        <ion-select
+          interface="popover"
+          placeholder="Tipo de documento"
+          formControlName="documentType">
+          <ion-select-option value="CC">Cédula de ciudadanía</ion-select-option>
+          <ion-select-option value="CE">Cédula de extranjería</ion-select-option>
+          <ion-select-option value="TI">Tarjeta de identidad</ion-select-option>
+          <ion-select-option value="PP">Pasaporte</ion-select-option>
+        </ion-select>
+      </div>
+      <ion-text color="danger" *ngIf="f['documentType'].touched && f['documentType'].invalid">
+        <small>Selecciona el tipo de documento.</small>
+      </ion-text>
 
-    <ion-item>
-      <ion-label position="stacked">País</ion-label>
-      <ion-input
-        formControlName="country"
-        autocapitalize="words">
-      </ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['country'].touched && f['country'].invalid">
-      <small>El país es obligatorio.</small>
-    </ion-text>
+      <div class="input-group">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <ion-input
+          inputmode="numeric"
+          placeholder="Número de documento"
+          formControlName="documentNumber">
+        </ion-input>
+      </div>
+      <ion-text color="danger" *ngIf="f['documentNumber'].touched && f['documentNumber'].invalid">
+        <small>Ingresa el número de documento.</small>
+      </ion-text>
 
-    <ion-item>
-      <ion-label position="stacked">Correo</ion-label>
-      <ion-input type="email" formControlName="email"></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['email'].touched && f['email'].invalid">
-      <small>Ingrese un correo válido.</small>
-    </ion-text>
+      <div class="input-group">
+        <ion-icon name="earth-outline"></ion-icon>
+        <ion-input
+          placeholder="País"
+          formControlName="country">
+        </ion-input>
+      </div>
+      <ion-text color="danger" *ngIf="f['country'].touched && f['country'].invalid">
+        <small>Ingresa tu país.</small>
+      </ion-text>
 
-    <ion-item>
-      <ion-label position="stacked">Contraseña</ion-label>
-      <ion-input type="password" formControlName="password"></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['password'].touched && f['password'].invalid">
-      <small>La contraseña debe tener mínimo 6 caracteres.</small>
-    </ion-text>
+      <div class="input-group">
+        <ion-icon name="mail-outline"></ion-icon>
+        <ion-input
+          type="email"
+          placeholder="Email"
+          formControlName="email">
+        </ion-input>
+      </div>
+      <ion-text color="danger" *ngIf="f['email'].touched && f['email'].invalid">
+        <small>Ingresa un correo válido.</small>
+      </ion-text>
 
-    <ion-button
-      expand="block"
-      type="submit"
-      class="ion-margin-top"
-      [disabled]="isSubmitting">
-      {{ isSubmitting ? 'Registrando...' : 'Crear cuenta' }}
-    </ion-button>
+      <div class="input-group">
+        <ion-icon name="lock-closed-outline"></ion-icon>
+        <ion-input
+          [type]="showPassword ? 'text' : 'password'"
+          placeholder="Password"
+          formControlName="password">
+        </ion-input>
 
-    <ion-button
-      expand="block"
-      fill="outline"
-      type="button"
-      class="ion-margin-top"
-      (click)="goToLogin()">
-      Ir al login
-    </ion-button>
-  </form>
+        <ion-button fill="clear" type="button" (click)="togglePassword()">
+          <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </ion-button>
+      </div>
+      <ion-text color="danger" *ngIf="f['password'].touched && f['password'].invalid">
+        <small>La contraseña debe tener mínimo 6 caracteres.</small>
+      </ion-text>
+
+      <ion-text color="danger" *ngIf="errorMessage">
+        <p>{{ errorMessage }}</p>
+      </ion-text>
+
+      <ion-button
+        expand="block"
+        class="register-btn"
+        type="submit"
+        [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Creando cuenta...' : 'CREAR CUENTA' }}
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        fill="outline"
+        class="login-link-btn"
+        type="button"
+        (click)="goToLogin()">
+        IR AL LOGIN
+      </ion-button>
+
+    </form>
+  </div>
+
 </ion-content>

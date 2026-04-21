@@ -1,85 +1,104 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Agregar tarjeta</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Add New Card</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <form [formGroup]="cardForm" (ngSubmit)="onSubmit()">
+  <div class="page-copy slide-up">
+    <p>Securely link your payment method</p>
+  </div>
 
-    <ion-item>
-      <ion-label position="stacked">Nombre del titular</ion-label>
-      <ion-input formControlName="holderName"></ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['holderName'].touched && f['holderName'].invalid">
-      <small>El nombre del titular es obligatorio.</small>
-    </ion-text>
+  <div class="card-preview slide-up stagger-1" [ngClass]="getPreviewCardClass()">
+    <div class="preview-top">
+      <span class="preview-type">DEBIT</span>
+      <span class="preview-type">CARD</span>
+    </div>
 
-    <ion-item>
-      <ion-label position="stacked">Número de tarjeta</ion-label>
-      <ion-input
-        formControlName="cardNumber"
-        inputmode="numeric"
-        maxlength="19"
-        (ionInput)="onCardNumberInput($event)">
-      </ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['cardNumber'].touched && f['cardNumber'].invalid">
-      <small>Ingrese un número de tarjeta válido.</small>
-    </ion-text>
+    <div class="preview-name-label">YOUR NAME</div>
+    <div class="preview-number">{{ previewCardNumber }}</div>
 
-    <ion-item lines="none">
-      <ion-label>
-        Franquicia detectada:
-        <strong>
-          {{
-            detectedBrand === 'visa'
-              ? 'Visa'
-              : detectedBrand === 'mastercard'
-              ? 'Mastercard'
-              : 'Desconocida'
-          }}
-        </strong>
-      </ion-label>
-    </ion-item>
+    <div class="preview-bottom">
+      <div class="preview-holder">
+        <span>{{ previewHolderName }}</span>
+      </div>
 
-    <ion-item>
-      <ion-label position="stacked">Expiración (MM/YY)</ion-label>
-      <ion-input
-        formControlName="expiryDate"
-        inputmode="numeric"
-        maxlength="5"
-        (ionInput)="onExpiryInput($event)">
-      </ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['expiryDate'].touched && f['expiryDate'].invalid">
-      <small>Ingrese una fecha válida.</small>
-    </ion-text>
+      <div class="preview-expiry">
+        <span>{{ previewExpiryDate }}</span>
+      </div>
+    </div>
+  </div>
 
-    <ion-item>
-      <ion-label position="stacked">CVV</ion-label>
-      <ion-input
-        formControlName="cvv"
-        inputmode="numeric"
-        maxlength="4"
-        type="password"
-        (ionInput)="onCvvInput($event)">
-      </ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="f['cvv'].touched && f['cvv'].invalid">
-      <small>Ingrese un CVV válido.</small>
-    </ion-text>
+  <form [formGroup]="cardForm" (ngSubmit)="onSubmit()" class="slide-up stagger-2">
+    <div class="field-group">
+      <label>CARDHOLDER NAME</label>
+      <ion-item>
+        <ion-input
+          formControlName="holderName"
+          placeholder="James Smith">
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="f['holderName'].touched && f['holderName'].invalid">
+        <small>Ingresa el nombre del titular.</small>
+      </ion-text>
+    </div>
 
-    <ion-text color="danger" *ngIf="errorMessage">
-      <p>{{ errorMessage }}</p>
-    </ion-text>
+    <div class="field-group">
+      <label>CARD NUMBER</label>
+      <ion-item>
+        <ion-input
+          inputmode="numeric"
+          formControlName="cardNumber"
+          placeholder="XXXX XXXX XXXX XXXX">
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="f['cardNumber'].touched && f['cardNumber'].invalid">
+        <small>Ingresa el número de tarjeta.</small>
+      </ion-text>
+    </div>
+
+    <div class="double-row">
+      <div class="field-group">
+        <label>EXPIRY DATE</label>
+        <ion-item>
+          <ion-input
+            inputmode="numeric"
+            formControlName="expiryDate"
+            placeholder="MM/YY">
+          </ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="f['expiryDate'].touched && f['expiryDate'].invalid">
+          <small>Fecha obligatoria.</small>
+        </ion-text>
+      </div>
+
+      <div class="field-group">
+        <label>CVC</label>
+        <ion-item>
+          <ion-input
+            inputmode="numeric"
+            type="password"
+            formControlName="cvv"
+            placeholder="***">
+          </ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="f['cvv'].touched && f['cvv'].invalid">
+          <small>CVC inválido.</small>
+        </ion-text>
+      </div>
+    </div>
 
     <ion-button
       expand="block"
-      class="ion-margin-top"
+      color="success"
+      class="submit-btn"
       type="submit"
       [disabled]="isSubmitting">
-      {{ isSubmitting ? 'Guardando...' : 'Guardar tarjeta' }}
+      <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+      {{ isSubmitting ? 'Guardando...' : 'ADD NEW CARD' }}
     </ion-button>
   </form>
 </ion-content>

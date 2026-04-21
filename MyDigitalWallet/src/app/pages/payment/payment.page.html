@@ -1,49 +1,84 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
     <ion-title>Confirm Payment</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ng-container *ngIf="!isLoading; else loading">
+  <ng-container *ngIf="!isLoading; else loadingTemplate">
 
-    <div class="payment-container">
+    <div class="payment-header-copy slide-up">
       <h2>{{ merchant }}</h2>
+      <div class="payment-amount">$ {{ amount | number }}</div>
+    </div>
 
-      <h1 class="amount">
-        $ {{ amount | number }}
-      </h1>
+    <ng-container *ngIf="selectedCard; else noCardTemplate">
+      <div
+        class="payment-card slide-up stagger-1"
+        [ngClass]="getCardClass(selectedCard)"
+      >
+        <div class="payment-card-top">
+          <div class="chip"></div>
+          <span class="card-brand">{{ selectedCard.brand | uppercase }}</span>
+        </div>
 
-      <div class="card-box" *ngIf="selectedCard" [ngClass]="getCardClass(selectedCard)">
-        <div class="chip"></div>
-
-        <div class="card-number">
+        <div class="payment-card-number">
           {{ getMaskedCardNumber(selectedCard.cardNumber) }}
         </div>
 
-        <div class="card-footer">
-          <span>{{ selectedCard.holderName }}</span>
-          <span>{{ selectedCard.brand | uppercase }}</span>
+        <div class="payment-card-bottom">
+          <div>
+            <small>Card Holder</small>
+            <strong>{{ selectedCard.holderName }}</strong>
+          </div>
+
+          <div>
+            <small>Exp. Date</small>
+            <strong>{{ selectedCard.expiryDate }}</strong>
+          </div>
         </div>
       </div>
 
-      <ion-item *ngIf="cards.length > 1">
-        <ion-label>Seleccionar tarjeta</ion-label>
-        <ion-select (ionChange)="changeCard($event.detail.value)">
-          <ion-select-option *ngFor="let card of cards" [value]="card">
-            {{ card.brand | uppercase }} - {{ getMaskedCardNumber(card.cardNumber) }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
+      <div class="selected-card-info slide-up stagger-2">
+        <div class="info-chip">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <span>Tarjeta activa seleccionada desde el dashboard</span>
+        </div>
+      </div>
 
-      <ion-button expand="block" class="confirm-btn" (click)="confirmPayment()">
+      <ion-button
+        expand="block"
+        color="primary"
+        class="confirm-btn slide-up stagger-3"
+        (click)="confirmPayment()">
+        <ion-icon slot="start" name="shield-checkmark-outline"></ion-icon>
         Confirm Payment
       </ion-button>
-    </div>
+    </ng-container>
+
+    <ng-template #noCardTemplate>
+      <div class="no-card-box slide-up stagger-1">
+        <div class="no-card-icon">
+          <ion-icon name="wallet-outline"></ion-icon>
+        </div>
+        <h3>No tienes tarjeta activa</h3>
+        <p>Primero selecciona o agrega una tarjeta desde el dashboard.</p>
+
+        <ion-button expand="block" color="primary" (click)="goToHome()">
+          Ir al dashboard
+        </ion-button>
+      </div>
+    </ng-template>
 
   </ng-container>
 
-  <ng-template #loading>
-    <p>Cargando...</p>
+  <ng-template #loadingTemplate>
+    <div class="loading-box">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando información del pago...</p>
+    </div>
   </ng-template>
 </ion-content>

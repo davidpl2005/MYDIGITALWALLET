@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Home</ion-title>
+    <ion-title>Dashboard</ion-title>
 
     <ion-buttons slot="end">
       <ion-button fill="clear" class="profile-btn" (click)="openProfileModal()">
@@ -13,28 +13,32 @@
 <ion-content class="ion-padding">
   <ng-container *ngIf="!isLoading && user; else loadingTemplate">
 
-    <div class="welcome-section">
-      <h1>Hola {{ user.name }}!</h1>
-      <p>Administra tu dinero.</p>
+    <div class="welcome-section slide-up">
+      <div class="welcome-copy">
+        <h1>{{ getGreeting() }}, {{ user.name }}</h1>
+        <p>Controla tus movimientos y gestiona tus tarjetas.</p>
+      </div>
     </div>
 
     <ng-container *ngIf="featuredCard; else noCardTemplate">
-      <div
-        class="featured-card"
-        [ngClass]="getCardClass(featuredCard)"
-      >
+      <div class="featured-card slide-up stagger-1"
+        [ngClass]="[getCardClass(featuredCard), isChangingCard ? 'card-switching' : '']">
         <div class="featured-card-top">
-          <div class="brand-label">
-            {{ featuredCard.brand | uppercase }}
+          <div class="brand-badge-chip">
+            <ion-icon [name]="featuredCard.brand === 'visa' ? 'card-outline' : 'albums-outline'"></ion-icon>
+            <span>{{ featuredCard.brand | uppercase }}</span>
           </div>
 
           <div class="featured-card-actions">
-            <ion-button fill="clear" size="small" (click)="editCard(featuredCard)">
-              Editar
-            </ion-button>
-            <ion-button fill="clear" size="small" color="light" (click)="deleteCard(featuredCard)">
-              Eliminar
-            </ion-button>
+            <button type="button" class="card-action-btn card-action-edit" (click)="openEditCardModal(featuredCard)">
+              <ion-icon name="create-outline"></ion-icon>
+              <span>Editar</span>
+            </button>
+
+            <button type="button" class="card-action-btn card-action-delete" (click)="deleteCard(featuredCard)">
+              <ion-icon name="trash-outline"></ion-icon>
+              <span>Eliminar</span>
+            </button>
           </div>
         </div>
 
@@ -43,12 +47,12 @@
         </div>
 
         <div class="featured-card-info">
-          <div>
+          <div class="info-box">
             <span class="label">Card Type</span>
             <strong>{{ featuredCard.brand === 'visa' ? 'Visa' : 'Mastercard' }}</strong>
           </div>
 
-          <div>
+          <div class="info-box">
             <span class="label">Exp. Date</span>
             <strong>{{ featuredCard.expiryDate }}</strong>
           </div>
@@ -62,55 +66,70 @@
     </ng-container>
 
     <ng-template #noCardTemplate>
-      <div class="no-card-box">
-        <div class="no-card-icon">💳</div>
+      <div class="no-card-box slide-up stagger-1">
+        <div class="no-card-icon">
+          <ion-icon name="wallet-outline"></ion-icon>
+        </div>
         <p>No cards available.</p>
 
-        <ion-button shape="round" color="medium" (click)="goToAddCard()">
-          + Add Card
+        <ion-button shape="round" color="primary" (click)="goToAddCard()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Add Card
         </ion-button>
       </div>
     </ng-template>
 
-    <div class="quick-grid">
-      <button class="quick-box quick-box-cyan" (click)="openChangeCard()">
-        <span>📚</span>
+    <div class="quick-grid slide-up stagger-2">
+      <button type="button" class="quick-box quick-box-cyan" (click)="openChangeCardModal()">
+        <div class="quick-icon-wrap">
+          <ion-icon name="swap-horizontal-outline"></ion-icon>
+        </div>
         <small>Change</small>
       </button>
 
-      <button class="quick-box quick-box-lime" (click)="goToPayment()">
-        <span>💳</span>
+      <button type="button" class="quick-box quick-box-lime" (click)="goToPayment()">
+        <div class="quick-icon-wrap">
+          <ion-icon name="card-outline"></ion-icon>
+        </div>
         <small>Pay Now</small>
       </button>
 
-      <button class="quick-box quick-box-dark" (click)="goToAddCard()">
-        <span>＋</span>
+      <button type="button" class="quick-box quick-box-dark" (click)="goToAddCard()">
+        <div class="quick-icon-wrap">
+          <ion-icon name="add-circle-outline"></ion-icon>
+        </div>
         <small>Add Card</small>
       </button>
     </div>
 
-    <div class="history-header">
+    <div class="history-header slide-up stagger-3">
       <h2>Card History</h2>
-      <button class="view-all-btn" (click)="goToTransactions()">
+      <button type="button" class="view-all-btn" (click)="goToTransactions()">
         View All
       </button>
     </div>
 
-    <ion-card *ngIf="transactions.length === 0" class="empty-history-card">
+    <ion-card *ngIf="transactions.length === 0" class="empty-history-card slide-up stagger-4">
       <ion-card-content>
         No transactions with this selected card.
       </ion-card-content>
     </ion-card>
 
-    <ion-card *ngFor="let tx of transactions" class="home-history-card">
+    <ion-card *ngFor="let tx of transactions" class="home-history-card slide-up stagger-4">
       <ion-card-content>
         <div class="tx-row">
           <div class="tx-left">
-            <h3>{{ tx.merchant }}</h3>
-            <p>{{ getCardInfo(tx.cardId) }}</p>
-            <small>
-              {{ tx.date?.toDate ? (tx.date.toDate() | date:'short') : (tx.date | date:'short') }}
-            </small>
+            <div class="tx-icon">
+              <ion-icon name="receipt-outline"></ion-icon>
+            </div>
+
+            <div>
+              <h3>{{ tx.merchant }}</h3>
+              <p>{{ getCardInfo(tx.cardId) }}</p>
+              <small>
+                {{ tx.date?.toDate ? (tx.date.toDate() | date:'short') : (tx.date | date:'short') }}
+              </small>
+            </div>
           </div>
 
           <div class="tx-amount">
@@ -123,62 +142,206 @@
   </ng-container>
 
   <ng-template #loadingTemplate>
-    <p>Cargando...</p>
+    <div class="loading-box">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando dashboard...</p>
+    </div>
   </ng-template>
+</ion-content>
 
-  <ion-modal [isOpen]="profileModalOpen" (didDismiss)="closeProfileModal()">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Mi perfil</ion-title>
+<!-- MODAL CAMBIO DE TARJETA -->
+<ion-modal [isOpen]="changeCardModalOpen" (didDismiss)="closeChangeCardModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Change Card</ion-title>
 
-          <ion-buttons slot="end">
-            <ion-button (click)="closeProfileModal()">Cerrar</ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeChangeCardModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
 
-      <ion-content class="ion-padding">
-        <div class="profile-avatar-wrap">
-          <div class="profile-avatar">💳</div>
-          <h2>{{ profileForm.get('name')?.value }} {{ profileForm.get('lastName')?.value }}</h2>
-          <p>App VIP Member</p>
+    <ion-content class="ion-padding modal-content">
+      <div class="change-hero">
+        <h2>Desliza para cambiar tarjeta</h2>
+        <p>Mueve a izquierda o derecha para ver tus tarjetas disponibles.</p>
+      </div>
+
+      <div class="swipe-card-area" (touchstart)="onCardTouchStart($event)" (touchend)="onCardTouchEnd($event)">
+        <button type="button" class="nav-arrow left" (click)="previousCarouselCard()" aria-label="Previous card">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+
+        <div *ngIf="getCurrentCarouselCard() as currentCard" class="carousel-card scale-in"
+          [ngClass]="getCardClass(currentCard)">
+          <div class="carousel-card-top">
+            <span>{{ currentCard.brand | uppercase }}</span>
+            <ion-icon name="swap-horizontal-outline"></ion-icon>
+          </div>
+
+          <div class="carousel-card-number">
+            {{ getMaskedCardNumber(currentCard.cardNumber) }}
+          </div>
+
+          <div class="carousel-card-bottom">
+            <div>
+              <small>Name</small>
+              <strong>{{ currentCard.holderName }}</strong>
+            </div>
+
+            <div>
+              <small>Card Type</small>
+              <strong>{{ currentCard.brand === 'visa' ? 'Visa' : 'Mastercard' }}</strong>
+            </div>
+
+            <div>
+              <small>Exp. Date</small>
+              <strong>{{ currentCard.expiryDate }}</strong>
+            </div>
+          </div>
         </div>
 
-        <form [formGroup]="profileForm">
+        <button type="button" class="nav-arrow right" (click)="nextCarouselCard()" aria-label="Next card">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="carousel-user">
+        <h3>{{ getCurrentCarouselCard()?.holderName }}</h3>
+        <p>
+          {{ getCurrentCarouselCard()?.brand | titlecase }}
+          •
+          {{ getMaskedCardNumber(getCurrentCarouselCard()?.cardNumber || '') }}
+        </p>
+      </div>
+
+      <ion-button expand="block" color="success" class="set-default-btn" (click)="applyCurrentCarouselCard()">
+        <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+        Usar esta tarjeta
+      </ion-button>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- MODAL EDITAR TARJETA -->
+<ion-modal [isOpen]="editCardModalOpen" (didDismiss)="closeEditCardModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Editar tarjeta</ion-title>
+
+        <ion-buttons slot="end">
+          <ion-button (click)="closeEditCardModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding modal-content">
+      <div class="edit-preview-card slide-up" [ngClass]="getEditPreviewClass()">
+        <div class="edit-preview-top">
+          <span>{{ editPreviewBrand === 'unknown' ? 'CARD' : (editPreviewBrand | uppercase) }}</span>
+          <ion-icon name="create-outline"></ion-icon>
+        </div>
+
+        <div class="edit-preview-number">
+          {{ editPreviewCardNumber }}
+        </div>
+
+        <div class="edit-preview-bottom">
+          <div>
+            <small>Name</small>
+            <strong>{{ editPreviewHolderName }}</strong>
+          </div>
+
+          <div>
+            <small>Exp</small>
+            <strong>{{ editPreviewExpiryDate }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <form [formGroup]="editCardForm" class="edit-card-form">
+        <div class="field-group">
+          <label>Nombre del titular</label>
           <ion-item>
-            <ion-label position="stacked">Nombre</ion-label>
-            <ion-input formControlName="name"></ion-input>
+            <ion-input formControlName="holderName"></ion-input>
           </ion-item>
+        </div>
 
+        <div class="field-group">
+          <label>Número de tarjeta</label>
           <ion-item>
-            <ion-label position="stacked">Apellido</ion-label>
-            <ion-input formControlName="lastName"></ion-input>
+            <ion-input inputmode="numeric" formControlName="cardNumber"></ion-input>
           </ion-item>
+        </div>
 
-          <ion-item lines="none" class="bio-item">
-            <ion-label>Biometría</ion-label>
-            <ion-toggle formControlName="biometricEnabled"></ion-toggle>
+        <div class="field-group">
+          <label>Fecha de expiración</label>
+          <ion-item>
+            <ion-input inputmode="numeric" formControlName="expiryDate"></ion-input>
           </ion-item>
+        </div>
 
-          <ion-button
-            expand="block"
-            class="save-btn"
-            (click)="saveProfile()"
-            [disabled]="isSavingProfile">
-            {{ isSavingProfile ? 'Guardando...' : 'Guardar cambios' }}
-          </ion-button>
-        </form>
-
-        <ion-button
-          expand="block"
-          fill="outline"
-          color="danger"
-          class="logout-modal-btn"
-          (click)="logout()">
-          Cerrar sesión
+        <ion-button expand="block" color="primary" class="save-btn" type="button" (click)="saveEditedCard()"
+          [disabled]="isSavingCard">
+          <ion-icon slot="start" name="save-outline"></ion-icon>
+          {{ isSavingCard ? 'Guardando...' : 'Guardar cambios' }}
         </ion-button>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
-</ion-content>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- MODAL PERFIL -->
+<ion-modal [isOpen]="profileModalOpen" (didDismiss)="closeProfileModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Mi perfil</ion-title>
+
+        <ion-buttons slot="end">
+          <ion-button (click)="closeProfileModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding modal-content">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <h2>{{ profileForm.get('name')?.value }} {{ profileForm.get('lastName')?.value }}</h2>
+        <p>Configura tu acceso y datos personales</p>
+      </div>
+
+      <form [formGroup]="profileForm">
+        <ion-item>
+          <ion-label position="stacked">Nombre</ion-label>
+          <ion-input formControlName="name"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Apellido</ion-label>
+          <ion-input formControlName="lastName"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="bio-item">
+          <ion-label>Biometría</ion-label>
+          <ion-toggle formControlName="biometricEnabled"></ion-toggle>
+        </ion-item>
+
+        <ion-button expand="block" class="save-btn" color="primary" type="button" (click)="saveProfile()"
+          [disabled]="isSavingProfile">
+          <ion-icon slot="start" name="save-outline"></ion-icon>
+          {{ isSavingProfile ? 'Guardando...' : 'Guardar cambios' }}
+        </ion-button>
+      </form>
+
+      <ion-button expand="block" fill="outline" color="danger" class="logout-modal-btn" (click)="logout()">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
+        Cerrar sesión
+      </ion-button>
+    </ion-content>
+  </ng-template>
+</ion-modal>

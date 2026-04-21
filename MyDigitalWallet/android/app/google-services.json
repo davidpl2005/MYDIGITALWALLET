@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "518574198993",
+    "project_id": "mydigitalwallet-bca10",
+    "storage_bucket": "mydigitalwallet-bca10.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:518574198993:android:14bfd3ea482b7f281a35f0",
+        "android_client_info": {
+          "package_name": "com.mydigitalwallet.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "518574198993-nensp5ptn9bv8v52cvs1bi7jdjsnsosl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCH84HYDL3lmzL8hWjAimg4cue3Te7GUAc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "518574198993-nensp5ptn9bv8v52cvs1bi7jdjsnsosl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

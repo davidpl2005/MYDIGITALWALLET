@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { UserService } from 'src/app/core/services/user.service';
+import { AppUser } from 'src/app/interfaces/user.interface';
 
 @Component({
   selector: 'app-register',
@@ -13,13 +15,14 @@ import { UserService } from 'src/app/core/services/user.service';
 export class RegisterPage implements OnInit {
   registerForm!: FormGroup;
   isSubmitting = false;
-
-  documentTypes: string[] = ['CC', 'TI', 'CE', 'PASAPORTE'];
+  errorMessage = '';
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private userService: UserService,
+    private toastController: ToastController,
     private router: Router
   ) {}
 
@@ -43,6 +46,10 @@ export class RegisterPage implements OnInit {
     return this.registerForm.controls;
   }
 
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
   async onSubmit(): Promise<void> {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -50,19 +57,18 @@ export class RegisterPage implements OnInit {
     }
 
     this.isSubmitting = true;
+    this.errorMessage = '';
 
     try {
       const formValue = this.registerForm.value;
 
-      const userCredential = await this.authService.register(
+      const credential = await this.authService.register(
         formValue.email,
         formValue.password
       );
 
-      const uid = userCredential.user.uid;
-
-      await this.userService.createUserProfile({
-        uid,
+      const userProfile: AppUser = {
+        uid: credential.user.uid,
         name: formValue.name,
         lastName: formValue.lastName,
         documentType: formValue.documentType,
@@ -72,12 +78,24 @@ export class RegisterPage implements OnInit {
         biometricEnabled: false,
         balance: 0,
         createdAt: new Date()
-      });
+      };
 
-      this.registerForm.reset();
+      await this.userService.createUserProfile(userProfile);
+
+      await this.showToast('Cuenta creada correctamente.', 'success');
       this.router.navigate(['/login']);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en registro:', error);
+
+      if (error?.code === 'auth/email-already-in-use') {
+        this.errorMessage = 'Este correo ya está registrado.';
+      } else if (error?.code === 'auth/invalid-email') {
+        this.errorMessage = 'El correo no es válido.';
+      } else if (error?.code === 'auth/weak-password') {
+        this.errorMessage = 'La contraseña es demasiado débil.';
+      } else {
+        this.errorMessage = 'No se pudo crear la cuenta.';
+      }
     } finally {
       this.isSubmitting = false;
     }
@@ -85,5 +103,16 @@ export class RegisterPage implements OnInit {
 
   goToLogin(): void {
     this.router.navigate(['/login']);
+  }
+
+  async showToast(message: string, color: 'success' | 'danger'): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2200,
+      color,
+      position: 'top'
+    });
+
+    await toast.present();
   }
 }

@@ -1,54 +1,159 @@
-.payment-container {
+:host {
+  ion-content {
+    --background: var(--app-background);
+  }
+}
+
+.payment-header-copy {
   text-align: center;
-  margin-top: 30px;
+  margin: 22px 0 24px;
 }
 
-.amount {
-  font-size: 40px;
-  font-weight: bold;
-  color: #4cd964;
-  margin: 20px 0;
+.payment-header-copy h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--app-text);
 }
 
-.card-box {
-  border-radius: 16px;
-  padding: 20px;
-  margin: 20px 0;
+.payment-amount {
+  margin-top: 14px;
+  font-size: 42px;
+  font-weight: 900;
+  color: #4ad66d;
+  letter-spacing: 0.5px;
+}
+
+.payment-card {
+  border-radius: 28px;
+  padding: 22px;
   color: white;
-  text-align: left;
+  box-shadow: var(--app-shadow);
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .visa-card {
-  background: linear-gradient(135deg, #1d2b64, #3a5fc4);
+  background: linear-gradient(135deg, var(--card-visa-start), var(--card-visa-end));
 }
 
 .mastercard-card {
-  background: linear-gradient(135deg, #b23a00, #ff7a00);
+  background: linear-gradient(135deg, var(--card-master-start), var(--card-master-end));
 }
 
 .default-card {
-  background: linear-gradient(135deg, #444, #666);
+  background: linear-gradient(135deg, var(--card-default-start), var(--card-default-end));
+}
+
+.payment-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .chip {
   width: 40px;
-  height: 25px;
-  background: gold;
-  border-radius: 4px;
-  margin-bottom: 15px;
+  height: 28px;
+  border-radius: 6px;
+  background: #ffd60a;
 }
 
-.card-number {
+.card-brand {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.payment-card-number {
+  font-size: 24px;
+  font-weight: 800;
   letter-spacing: 2px;
-  margin-bottom: 15px;
+  margin: 22px 0;
 }
 
-.card-footer {
+.payment-card-bottom {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  gap: 14px;
+}
+
+.payment-card-bottom small {
+  display: block;
+  opacity: 0.82;
+  margin-bottom: 4px;
+}
+
+.selected-card-info {
+  margin-top: 18px;
+}
+
+.info-chip {
+  background: #eff6ff;
+  color: var(--ion-color-primary);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  border: 1px solid #dbeafe;
+}
+
+.info-chip ion-icon {
+  font-size: 20px;
 }
 
 .confirm-btn {
-  margin-top: 30px;
+  margin-top: 24px;
+  min-height: 56px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.no-card-box {
+  background: white;
+  border-radius: 28px;
+  padding: 28px 22px;
+  text-align: center;
+  box-shadow: var(--app-shadow-soft);
+}
+
+.no-card-icon {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: var(--ion-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-card-icon ion-icon {
+  font-size: 36px;
+}
+
+.no-card-box h3 {
+  margin: 0 0 8px;
+  color: var(--app-text);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.no-card-box p {
+  color: var(--app-text-soft);
+  margin-bottom: 18px;
+}
+
+.loading-box {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-text-soft);
+  gap: 12px;
 }
