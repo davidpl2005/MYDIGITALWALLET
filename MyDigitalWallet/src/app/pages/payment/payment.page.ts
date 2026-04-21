@@ -6,6 +6,7 @@ import { CardService } from 'src/app/core/services/card.service';
 import { PaymentsService } from 'src/app/core/services/payments.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { BiometricAuthService } from 'src/app/core/services/biometric-auth.service';
+import { HapticsService } from 'src/app/core/services/haptics.service';
 import { CardModel } from 'src/app/interfaces/card.interface';
 import { AppUser } from 'src/app/interfaces/user.interface';
 
@@ -32,6 +33,7 @@ export class PaymentPage implements OnInit {
     private paymentsService: PaymentsService,
     private userService: UserService,
     private biometricAuthService: BiometricAuthService,
+    private hapticsService: HapticsService,
     private toastController: ToastController,
     private router: Router
   ) {}
@@ -124,6 +126,7 @@ export class PaymentPage implements OnInit {
       const authorized = await this.biometricAuthService.authenticate('Confirma tu identidad para procesar el pago');
 
       if (!authorized) {
+        await this.hapticsService.error();
         await this.showToast('Pago cancelado: autenticación requerida.', 'danger');
         return;
       }
@@ -139,6 +142,7 @@ export class PaymentPage implements OnInit {
         type: 'payment'
       });
 
+      await this.hapticsService.success();
       await this.showToast('Pago realizado correctamente.', 'success');
       this.router.navigate(['/home']);
     } catch (error) {

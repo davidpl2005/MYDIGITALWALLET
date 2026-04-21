@@ -4,6 +4,7 @@ import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { CardService } from 'src/app/core/services/card.service';
+import { HapticsService } from 'src/app/core/services/haptics.service';
 import { CardModel } from 'src/app/interfaces/card.interface';
 
 @Component({
@@ -25,6 +26,7 @@ export class AddCardPage implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private cardService: CardService,
+    private hapticsService: HapticsService,
     private toastController: ToastController,
     private router: Router
   ) {}
@@ -134,10 +136,10 @@ export class AddCardPage implements OnInit {
       };
 
       await this.cardService.createCard(cardData);
-
+      await this.hapticsService.success();
       await this.showToast('Tarjeta agregada correctamente.', 'success');
-      this.cardForm.reset();
 
+      this.cardForm.reset();
       this.previewHolderName = 'YOUR NAME';
       this.previewCardNumber = 'XXXX XXXX XXXX XXXX';
       this.previewExpiryDate = 'MM/YY';

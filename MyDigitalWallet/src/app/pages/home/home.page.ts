@@ -8,6 +8,7 @@ import { UserService } from 'src/app/core/services/user.service';
 import { CardService } from 'src/app/core/services/card.service';
 import { PaymentsService } from 'src/app/core/services/payments.service';
 import { BiometricAuthService } from 'src/app/core/services/biometric-auth.service';
+import { HapticsService } from 'src/app/core/services/haptics.service';
 import { AppUser } from 'src/app/interfaces/user.interface';
 import { CardModel } from 'src/app/interfaces/card.interface';
 import { TransactionModel } from 'src/app/interfaces/transaction.interface';
@@ -58,6 +59,7 @@ export class HomePage implements OnInit {
     private cardService: CardService,
     private paymentsService: PaymentsService,
     private biometricAuthService: BiometricAuthService,
+    private hapticsService: HapticsService,
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
@@ -316,6 +318,7 @@ export class HomePage implements OnInit {
     this.featuredCard = selected;
     localStorage.setItem(this.getSelectedCardStorageKey(), selected.id);
     this.loadTransactionsForSelectedCard();
+    await this.hapticsService.selection();
 
     setTimeout(() => {
       this.closeChangeCardModal();
@@ -442,6 +445,7 @@ export class HomePage implements OnInit {
         };
       }
 
+      await this.hapticsService.success();
       await this.showToast('Tarjeta actualizada correctamente.', 'success');
       this.closeEditCardModal();
     } catch (error) {
@@ -501,7 +505,15 @@ export class HomePage implements OnInit {
           return;
         }
 
-        await this.biometricAuthService.saveCredentials(this.user.email, password);
+        const emailToSave = this.user.email || this.authService.getCurrentUser()?.email || '';
+
+        if (!emailToSave) {
+          await this.showToast('No se encontró el correo del usuario.', 'danger');
+          this.isSavingProfile = false;
+          return;
+        }
+
+        await this.biometricAuthService.saveCredentials(emailToSave, password);
       }
 
       if (previousBiometricState && !nextBiometricState) {
@@ -523,6 +535,7 @@ export class HomePage implements OnInit {
         biometricEnabled: nextBiometricState
       };
 
+      await this.hapticsService.success();
       await this.showToast('Perfil actualizado correctamente.', 'success');
       this.profileModalOpen = false;
     } catch (error) {
@@ -558,6 +571,7 @@ export class HomePage implements OnInit {
           handler: async () => {
             try {
               await this.cardService.deleteCard(card.id!);
+              await this.hapticsService.warning();
               await this.showToast('Tarjeta eliminada correctamente.', 'success');
             } catch (error) {
               console.error('Error eliminando tarjeta:', error);

@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { CardService } from 'src/app/core/services/card.service';
 import { PaymentsService } from 'src/app/core/services/payments.service';
+import { HapticsService } from 'src/app/core/services/haptics.service';
 import { CardModel } from 'src/app/interfaces/card.interface';
 import { TransactionModel } from 'src/app/interfaces/transaction.interface';
 
@@ -30,6 +31,7 @@ export class TransactionsPage implements OnInit {
     private authService: AuthService,
     private cardService: CardService,
     private paymentsService: PaymentsService,
+    private hapticsService: HapticsService,
     private router: Router,
     private toastController: ToastController,
     private alertController: AlertController
@@ -108,9 +110,10 @@ export class TransactionsPage implements OnInit {
       });
   }
 
-  onCardChange(event: any): void {
+  async onCardChange(event: any): Promise<void> {
     this.selectedCardId = event?.detail?.value || '';
     localStorage.setItem(this.getSelectedCardStorageKey(), this.selectedCardId);
+    await this.hapticsService.selection();
     this.loadTransactions();
   }
 
@@ -185,6 +188,7 @@ export class TransactionsPage implements OnInit {
 
     try {
       await this.paymentsService.updateTransactionEmoji(this.selectedTransaction.id, emoji);
+      await this.hapticsService.light();
       await this.showToast('Emoji actualizado.', 'success');
     } catch (error) {
       console.error('Error actualizando emoji:', error);
@@ -225,6 +229,7 @@ export class TransactionsPage implements OnInit {
             try {
               await this.paymentsService.deleteTransaction(tx.id!);
               await slidingItem?.close();
+              await this.hapticsService.warning();
               await this.showToast('Transacción eliminada correctamente.', 'success');
             } catch (error) {
               console.error('Error eliminando transacción:', error);
