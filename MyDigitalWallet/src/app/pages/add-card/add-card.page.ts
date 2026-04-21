@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { CardService } from 'src/app/core/services/card.service';
 import { HapticsService } from 'src/app/core/services/haptics.service';
+import { ToastNativeService } from 'src/app/core/services/toast-native.service';
 import { CardModel } from 'src/app/interfaces/card.interface';
 
 @Component({
@@ -27,6 +28,7 @@ export class AddCardPage implements OnInit {
     private authService: AuthService,
     private cardService: CardService,
     private hapticsService: HapticsService,
+    private toastNativeService: ToastNativeService,
     private toastController: ToastController,
     private router: Router
   ) {}
@@ -137,6 +139,7 @@ export class AddCardPage implements OnInit {
 
       await this.cardService.createCard(cardData);
       await this.hapticsService.success();
+      await this.toastNativeService.success('Tarjeta agregada correctamente');
       await this.showToast('Tarjeta agregada correctamente.', 'success');
 
       this.cardForm.reset();
@@ -148,6 +151,7 @@ export class AddCardPage implements OnInit {
       this.router.navigate(['/home']);
     } catch (error) {
       console.error('Error agregando tarjeta:', error);
+      await this.toastNativeService.error('No se pudo agregar la tarjeta');
       await this.showToast('No se pudo agregar la tarjeta.', 'danger');
     } finally {
       this.isSubmitting = false;

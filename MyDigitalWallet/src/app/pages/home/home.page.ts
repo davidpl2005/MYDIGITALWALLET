@@ -9,6 +9,7 @@ import { CardService } from 'src/app/core/services/card.service';
 import { PaymentsService } from 'src/app/core/services/payments.service';
 import { BiometricAuthService } from 'src/app/core/services/biometric-auth.service';
 import { HapticsService } from 'src/app/core/services/haptics.service';
+import { ToastNativeService } from 'src/app/core/services/toast-native.service';
 import { AppUser } from 'src/app/interfaces/user.interface';
 import { CardModel } from 'src/app/interfaces/card.interface';
 import { TransactionModel } from 'src/app/interfaces/transaction.interface';
@@ -60,6 +61,7 @@ export class HomePage implements OnInit {
     private paymentsService: PaymentsService,
     private biometricAuthService: BiometricAuthService,
     private hapticsService: HapticsService,
+    private toastNativeService: ToastNativeService,
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
@@ -319,6 +321,7 @@ export class HomePage implements OnInit {
     localStorage.setItem(this.getSelectedCardStorageKey(), selected.id);
     this.loadTransactionsForSelectedCard();
     await this.hapticsService.selection();
+    await this.toastNativeService.success('Tarjeta activa actualizada');
 
     setTimeout(() => {
       this.closeChangeCardModal();
@@ -446,10 +449,12 @@ export class HomePage implements OnInit {
       }
 
       await this.hapticsService.success();
+      await this.toastNativeService.success('Tarjeta actualizada correctamente');
       await this.showToast('Tarjeta actualizada correctamente.', 'success');
       this.closeEditCardModal();
     } catch (error) {
       console.error('Error actualizando tarjeta:', error);
+      await this.toastNativeService.error('No se pudo actualizar la tarjeta');
       await this.showToast('No se pudo actualizar la tarjeta.', 'danger');
     } finally {
       this.isSavingCard = false;
@@ -536,10 +541,12 @@ export class HomePage implements OnInit {
       };
 
       await this.hapticsService.success();
+      await this.toastNativeService.success('Perfil actualizado correctamente');
       await this.showToast('Perfil actualizado correctamente.', 'success');
       this.profileModalOpen = false;
     } catch (error) {
       console.error('Error actualizando perfil:', error);
+      await this.toastNativeService.error('No se pudo actualizar el perfil');
       await this.showToast('No se pudo actualizar el perfil.', 'danger');
     } finally {
       this.isSavingProfile = false;
@@ -572,9 +579,11 @@ export class HomePage implements OnInit {
             try {
               await this.cardService.deleteCard(card.id!);
               await this.hapticsService.warning();
+              await this.toastNativeService.success('Tarjeta eliminada correctamente');
               await this.showToast('Tarjeta eliminada correctamente.', 'success');
             } catch (error) {
               console.error('Error eliminando tarjeta:', error);
+              await this.toastNativeService.error('No se pudo eliminar la tarjeta');
               await this.showToast('No se pudo eliminar la tarjeta.', 'danger');
             }
           }

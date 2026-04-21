@@ -7,6 +7,7 @@ import { PaymentsService } from 'src/app/core/services/payments.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { BiometricAuthService } from 'src/app/core/services/biometric-auth.service';
 import { HapticsService } from 'src/app/core/services/haptics.service';
+import { ToastNativeService } from 'src/app/core/services/toast-native.service';
 import { CardModel } from 'src/app/interfaces/card.interface';
 import { AppUser } from 'src/app/interfaces/user.interface';
 
@@ -34,6 +35,7 @@ export class PaymentPage implements OnInit {
     private userService: UserService,
     private biometricAuthService: BiometricAuthService,
     private hapticsService: HapticsService,
+    private toastNativeService: ToastNativeService,
     private toastController: ToastController,
     private router: Router
   ) {}
@@ -127,6 +129,7 @@ export class PaymentPage implements OnInit {
 
       if (!authorized) {
         await this.hapticsService.error();
+        await this.toastNativeService.error('Pago cancelado: autenticación requerida');
         await this.showToast('Pago cancelado: autenticación requerida.', 'danger');
         return;
       }
@@ -143,10 +146,12 @@ export class PaymentPage implements OnInit {
       });
 
       await this.hapticsService.success();
+      await this.toastNativeService.success('Pago realizado correctamente');
       await this.showToast('Pago realizado correctamente.', 'success');
       this.router.navigate(['/home']);
     } catch (error) {
       console.error('Error al procesar pago:', error);
+      await this.toastNativeService.error('Error al procesar pago');
       await this.showToast('Error al procesar pago.', 'danger');
     }
   }
