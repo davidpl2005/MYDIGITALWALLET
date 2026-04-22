@@ -10,6 +10,7 @@ import { HapticsService } from 'src/app/core/services/haptics.service';
 import { ToastNativeService } from 'src/app/core/services/toast-native.service';
 import { CardModel } from 'src/app/interfaces/card.interface';
 import { AppUser } from 'src/app/interfaces/user.interface';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 @Component({
   selector: 'app-payment',
@@ -31,6 +32,7 @@ export class PaymentPage implements OnInit {
   constructor(
     private authService: AuthService,
     private cardService: CardService,
+    private notificationService: NotificationService,
     private paymentsService: PaymentsService,
     private userService: UserService,
     private biometricAuthService: BiometricAuthService,
@@ -38,7 +40,8 @@ export class PaymentPage implements OnInit {
     private toastNativeService: ToastNativeService,
     private toastController: ToastController,
     private router: Router
-  ) {}
+
+  ) { }
 
   ngOnInit(): void {
     this.loadData();
@@ -144,6 +147,8 @@ export class PaymentPage implements OnInit {
         date: new Date(),
         type: 'payment'
       });
+      
+      await this.notificationService.sendPaymentNotification(this.merchant, this.amount);
 
       await this.hapticsService.success();
       await this.toastNativeService.success('Pago realizado correctamente');
